@@ -4,44 +4,110 @@ I = importlib
 
 action_interface = [I.Func('execute', args=('payload', 'caller'))]
 
+# TODO: Remove references in contract
 actions = Hash()
 metadata = Hash()
 balances = Hash(default_value=0)
 
 total_supply = Variable()
-tax_enabled = Variable()
-swap_enabled = Variable()
 swap_end_date = Variable()
 
-SWAP_FACTOR = 100
-BURN_ADDRESS = 'internal_save_burn'
+burn_address = Variable()
 
 @construct
 def seed():
-    balances[ctx.caller] = 10000000000000
+    balances[ctx.caller] = 0
 
-    actions['staking'] = 'con_save_staking'
-    actions['liquidity'] = 'con_save_liquidity'
-    actions['treasury'] = 'con_save_treasury'
-    actions['buyback'] = 'con_save_buyback'
-    actions['dev'] = 'con_save_dev'
+    metadata['action_liquidity'] = 'con_reflecttau_v2_liquidity'
+    metadata['action_treasury'] = 'con_reflecttau_v2_treasury'
+    metadata['action_buyback'] = 'con_reflecttau_v2_buyback'
+    metadata['action_dev'] = 'con_reflecttau_v2_developer'
 
+    # TODO: Not needed
     metadata['tax'] = 2
+    # TODO: Not needed
     metadata['tau_tax_threshold'] = 2
     metadata['dex'] = 'con_rocketswap_official_v1_1'
-    metadata['token_name'] = "SAVE Token"
-    metadata['token_symbol'] = "SAVE"
-    metadata['owner'] = ctx.caller
+    metadata['token_name'] = "ReflectTAU.io"
+    metadata['token_symbol'] = "RTAU"
+
+    # TODO: Set real addresses
+    metadata['operators'] = [
+        'ae7d14d6d9b8443f881ba6244727b69b681010e782d4fe482dbfb0b6aca02d5d',
+        '6a9004cbc570592c21879e5ee319c754b9b7bf0278878b1cc21ac87eed0ee38d',
+        'TODO'
+    ]
 
     total_supply.set(0)
+    burn_address.set('reflecttau_burn')
 
-    tax_enabled.set(True)
-    swap_enabled.set(True)
     swap_end_date.set(now + datetime.timedelta(days=180))
 
 @export
 def change_metadata(key: str, value: Any):
-    assert_owner(); metadata[key] = value
+    assert ctx.caller in metadata['operators'], 'Only executable by operators!'
+    assert key.lower() != 'operators', 'Can not change owners'
+    assert value, 'Parameter "value" can not be empty'
+
+    """
+    If it is an action core contract, make sure that the
+    contract exists and follows the agreed on interface
+    """
+    if isinstance(value, str) and value.startswith('action_'):
+        con = I.import_module(value)
+
+        error = 'Action contract does not follow the correct interface!'
+        assert I.enforce_interface(con, action_interface), error
+
+    """
+    Save key and value for an operator. It's not globally
+    set yet. Just temporarily saved for the current operator
+    """
+    metadata[key][ctx.caller] = value
+
+    agreed = None
+
+    # Check if all operators agree on the same value for the key
+    for op in metadata['operators']:
+        if metadata[key][op] != metadata[key][ctx.caller]:
+            agreed = False
+            break
+
+    if agreed:
+        # Finally set the value for the key
+        metadata[key] = value
+
+        """
+        Since agreement was met and the value set,
+        let's set each individual agreement to a
+        different value so that one-time agreements
+        can't be set immediately again by one operator
+        """
+        for op in metadata['operators']:
+            metadata[key][op] = op
+
+        return f'{key} = {value}'
+
+@export
+def assert_operators_agree(agreement: str, one_time: bool=True):
+    """
+    Operators can agree to specific action core executions.
+    The agreements will then be checked in the action core
+    contract before they execute.
+
+    The agreement keys need to have the following form:
+    <action_contract>:<function>:<arg_1>:<arg_2>:...
+
+    The value needs to be: "agreed"
+
+    If it is a 'one_time' agreement, it will be set to an
+    empty string after checking, to not allow execution
+    again without a new agreement from all operators.
+    """
+    assert metadata[agreement] == 'agreed', 'No agreement met!'
+
+    if one_time:
+        metadata[key] = ''
 
 @export
 def balance_of(address: str):
@@ -62,9 +128,8 @@ def transfer(amount: float, to: str):
     balances[ctx.caller] -= amount
     balances[to] += amount
 
-    if tax_enabled.get():
-        if ctx.caller == metadata['dex'] or to == metadata['dex']:
-            pay_tax(amount)
+    if ctx.caller == metadata['dex'] or to == metadata['dex']:
+        pay_tax(amount)
 
 @export
 def approve(amount: float, to: str):
@@ -81,9 +146,8 @@ def transfer_from(amount: float, to: str, main_account: str):
     balances[main_account] -= amount
     balances[to] += amount
 
-    if tax_enabled.get():
-        if ctx.caller == metadata['dex'] or to == metadata['dex']:
-            pay_tax(amount)
+    if ctx.caller == metadata['dex'] or to == metadata['dex']:
+        pay_tax(amount)
 
 def pay_tax(amount: float):
     tax_amount = amount / 100 * metadata['tax']
@@ -170,29 +234,8 @@ def disperse_funds():
     transfer_internal(save_balance, actions['treasury'])
 
 @export
-def register_action(action: str, contract: str):
-    assert_owner()
-    
-    assert actions[action] is None, 'Action already registered!'
-
-    con = I.import_module(contract)
-
-    error = 'Action contract does not follow the correct interface!'
-    assert I.enforce_interface(con, action_interface), error
-
-    actions[action] = contract
-
-@export
-def unregister_action(action: str):
-    assert_owner()
-    
-    assert actions[action] is not None, 'Action does not exist!'
-
-    actions[action] = None
-
-@export
 def execute(action: str, payload: dict):
-    assert_owner()
+    assert_executed_by_owner()
 
     contract = actions[action]
     assert contract is not None, 'Invalid action!'
@@ -200,17 +243,31 @@ def execute(action: str, payload: dict):
     return I.import_module(contract).execute(payload, ctx.caller)
 
 @export
-def swap_basic_to_save(basic_amount: float):
+def swap_basic(basic_amount: float):
     assert now < swap_end_date.get(), 'Swap period ended'
-    assert swap_enabled.get() == True, 'Swap currently disabled'
     assert basic_amount > 0, 'Cannot swap negative balances!'
 
     I.import_module('con_doug_lst001').transfer_from(
         main_account=ctx.caller, 
         amount=basic_amount, 
-        to=BURN_ADDRESS)
+        to=burn_addresss.get())
 
-    swap_amount = basic_amount / SWAP_FACTOR
+    swap_amount = basic_amount / 100
+    total_supply.set(total_supply.get() + swap_amount)
+    balances[ctx.caller] += swap_amount
+
+# TODO: What's the swap factor?
+@export
+def swap_rtau(basic_amount: float):
+    assert now < swap_end_date.get(), 'Swap period ended'
+    assert basic_amount > 0, 'Cannot swap negative balances!'
+
+    I.import_module('con_doug_lst001').transfer_from(
+        main_account=ctx.caller, 
+        amount=basic_amount, 
+        to=burn_addresss.get())
+
+    swap_amount = basic_amount / 10000
     total_supply.set(total_supply.get() + swap_amount)
     balances[ctx.caller] += swap_amount
 
@@ -219,20 +276,9 @@ def time_until_swap_end():
     return swap_end_date.get() - now
 
 @export
-def tax_enabled(enabled: bool):
-    assert_owner(); tax_enabled.set(enabled)
-
-@export
-def swap_enabled(enabled: bool):
-    assert_owner(); swap_enabled.set(enabled)
-
-@export
 def circulating_supply():
-    return int(total_supply.get() - balances[BURN_ADDRESS])
+    return int(total_supply.get() - balances[burn_address.get()])
 
 @export
 def total_supply():
     return int(total_supply.get())
-
-def assert_owner():
-    assert ctx.caller == metadata['owner'], 'Only executable by owner!'

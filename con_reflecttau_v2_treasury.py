@@ -1,12 +1,16 @@
 I = importlib
 
 import con_rocketswap_official_v1_1 as rswp
+import con_reflecttau_v2 as rtau
 
 RTAU_CONTRACT = 'con_reflecttau_v2'
 
 @export
 def execute(payload: dict, caller: str):
 	assert ctx.caller == RTAU_CONTRACT, 'You are not allowed to do that'
+
+	key = f"{ctx.this}:{payload['function']}:{payload['amount']}:{payload['to']}"
+	rtau.assert_operators_agree(agreement=key)
 
 	if payload['function'] == 'send_token':
 		return send_token(payload['contract'], payload['amount'], payload['to'])
