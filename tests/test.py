@@ -95,12 +95,35 @@ class MyTestCase(unittest.TestCase):
         self.reflecttau_v2.transfer(amount=1, to="hax")
         logging.debug("Transfered 1 RTAU V2 to Address: hax with (REAL NEW RECEIVER ADDRESS BALANCE): "+ str(self.reflecttau_v2.balance_of(address="hax"))+" RTAU V2")
 
-        logging.debug("--------------------- 3. TEST TRANSFER_FROM (NORMAL - USER) RTAU V2 -------------------------")
+        logging.debug("--------------------- 4. TEST TRANSFER_FROM (NORMAL - USER) RTAU V2 -------------------------")
         logging.debug("Approving 1 RTAU to ff61544ea94eaaeb5df08ed863c4a938e9129aba6ceee5f31b6681bdede11b89")
         self.reflecttau_v2.approve(amount=1,to="ff61544ea94eaaeb5df08ed863c4a938e9129aba6ceee5f31b6681bdede11b89")
         logging.debug("Transfering 1 RTAU V2 to Address: hax where main_account is ff61544ea94eaaeb5df08ed863c4a938e9129aba6ceee5f31b6681bdede11b89")
         self.reflecttau_v2.transfer_from(amount=1, to="hax", main_account="ff61544ea94eaaeb5df08ed863c4a938e9129aba6ceee5f31b6681bdede11b89")
         logging.debug("Transfered 1 RTAU V2 to Address: hax with (REAL NEW RECEIVER ADDRESS BALANCE): "+ str(self.reflecttau_v2.balance_of(address="hax"))+" RTAU V2")
+
+        logging.debug("--------------------- 5. TEST DISPERSE FUNDS RTAU V2 -------------------------")
+        self.reflecttau_v2.disperse_funds()
+        logging.debug("Dispersed " + str(self.reflecttau_v2.disperse_funds()) +" TAU")
+
+        
+        logging.debug("--------------------- 6. TEST CREATE PAIR RTAU V2 -------------------------")
+        self.reflecttau_v2.approve(amount=1,to="con_rocketswap_official_v1_1")
+        self.currency.approve(amount=3,to="con_rocketswap_official_v1_1")
+        self.rswp_token.approve(amount=1,to="con_rocketswap_official_v1_1")
+        logging.debug("Useless RSWP Pair created (Has to exist for Rocketswap to work): " + str(self.rocketswap.create_market(contract="con_rswp_lst001",currency_amount=1,token_amount=1)))
+        logging.debug("RTAU V2 Pair created: " + str(self.rocketswap.create_market(contract="con_reflecttau_v2",currency_amount=2,token_amount=1)))
+
+        logging.debug("--------------------- 7. TEST BUY RTAU V2 -------------------------")
+        self.currency.approve(amount=1,to="con_rocketswap_official_v1_1")
+        logging.debug("Purchased: " + str(self.rocketswap.buy(contract="con_reflecttau_v2", currency_amount=1)) + " RTAU V2")
+        logging.debug("User now has: " + str(self.reflecttau_v2.balance_of(address=self.c.signer)) + " RTAU V2 and " + str(self.currency.balance_of(account=self.c.signer)) + " TAU")
+
+
+        logging.debug("--------------------- 8. TEST SELL RTAU V2 -------------------------")
+        self.reflecttau_v2.approve(amount=1,to="con_rocketswap_official_v1_1")
+        logging.debug("Sold for: " + str(self.rocketswap.sell(contract="con_reflecttau_v2", token_amount=1)) + " TAU")
+        logging.debug("User now has: " + str(self.reflecttau_v2.balance_of(address=self.c.signer)) + " RTAU V2 and " + str(self.currency.balance_of(account=self.c.signer)) + " TAU")
 
         #self.currency.approve(amount=4,to="con_rocketswap_official_v1_1",signer="hax")
         #self.reflecttau_v2.approve(amount=990090000,to="con_rocketswap_official_v1_1")
