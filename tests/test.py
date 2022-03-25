@@ -83,13 +83,13 @@ class MyTestCase(unittest.TestCase):
 
         logging.debug("Approving 10 BASIC to con_reflecttau_v2")
         self.basic.approve(amount=10,to="con_reflecttau_v2")
-        logging.debug("Swapped 10 BASIC to " + str(self.reflecttau_v2.swap_basic(basic_amount=10)) + " RTAU V2")
+        logging.debug("Swapped 10 BASIC to (RETURN VALUE)" + str(self.reflecttau_v2.swap_basic(basic_amount=10)) + "/ (REAL NEW ADDRESS BALANCE)"+ str(self.reflecttau_v2.balance_of(address=self.c.signer))+" RTAU V2")
 
         logging.debug("--------------------- 2. TEST SWAP RTAU TO RTAU V2 TOKEN -------------------------")
 
         logging.debug("Approving 10 RTAU to con_reflecttau_v2")
         self.reflecttau.approve(amount=10,to="con_reflecttau_v2")
-        logging.debug("Swapped 10 RTAU to " + str(self.reflecttau_v2.swap_rtau(rtau_amount=10)) + " RTAU V2")
+        logging.debug("Swapped 10 RTAU to (RETURN VALUE)" + str(self.reflecttau_v2.swap_rtau(rtau_amount=10)) + "/ (REAL NEW ADDRESS BALANCE)"+ str(self.reflecttau_v2.balance_of(address=self.c.signer))+" RTAU V2")
 
         #self.currency.approve(amount=4,to="con_rocketswap_official_v1_1",signer="hax")
         #self.reflecttau_v2.approve(amount=990090000,to="con_rocketswap_official_v1_1")
