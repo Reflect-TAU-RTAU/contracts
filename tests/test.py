@@ -103,7 +103,6 @@ class MyTestCase(unittest.TestCase):
         logging.debug("Transfered 1 RTAU V2 to Address: hax with (REAL NEW RECEIVER ADDRESS BALANCE): "+ str(self.reflecttau_v2.balance_of(address="hax"))+" RTAU V2")
 
         logging.debug("\x1b[33;20m5. TEST DISPERSE FUNDS RTAU V2\x1b[0m")
-        self.reflecttau_v2.disperse_funds()
         logging.debug("Dispersed " + str(self.reflecttau_v2.disperse_funds()) +" TAU")
 
         

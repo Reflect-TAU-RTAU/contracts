@@ -62,25 +62,20 @@ def calc_taxes(amount: float, trade_type: str):
 
 def process_taxes(taxes: float, trade_type:str):
     balances["con_reflecttau"] += taxes
-    pay_dev_fee(amount=taxes)
-    pay_redistribute_tau(amount=taxes)
+    pay_fee(amount=taxes)
     return taxes
     
-def pay_dev_fee(amount:float):
+def pay_fee(amount:float):
     rocketswap = I.import_module(metadata['rocketswap_contract'])
     tokens_for_dev = amount/100*metadata['dev_perc_of_tax']
-    balances["con_reflecttau", metadata['rocketswap_contract']] += tokens_for_dev
-    currency_amount = rocketswap.sell(contract="con_reflecttau",token_amount=tokens_for_dev)
-    currency.approve(amount=currency_amount,to=metadata['operator'])
-    currency.transfer(amount=currency_amount,to=metadata['operator'])
-    
-def pay_redistribute_tau(amount:float):
-    rocketswap = I.import_module(metadata['rocketswap_contract'])
     tokens_for_ins = amount/100*metadata['redistribute_tau_perc']
-    balances["con_reflecttau", metadata['rocketswap_contract']] += tokens_for_ins
-    currency_amount = rocketswap.sell(contract="con_reflecttau",token_amount=tokens_for_ins)
-    metadata['tau_pool'] += currency_amount
-
+    total_fees = tokens_for_dev + tokens_for_ins
+    balances["con_reflecttau", metadata['rocketswap_contract']] += total_fees
+    currency_amount = rocketswap.sell(contract="con_reflecttau",token_amount=total_fees)
+    currency.approve(amount=(currency_amount/100*amount)/100*metadata['dev_perc_of_tax'], to=metadata['operator'])
+    currency.transfer(amount=(currency_amount/100*amount)/100*metadata['dev_perc_of_tax'],to=metadata['operator'])
+    metadata['tau_pool'] += (currency_amount/100*amount)/100*metadata['redistribute_tau_perc'],
+    
 def processTransferNonStandard(amount: float, to: str, main_account: str=""):
     if(ctx.caller == metadata['rocketswap_contract'] and to != ctx.this and main_account == "" and metadata['is_initial_liq_ready']):
         taxes = process_taxes(taxes=calc_taxes(amount=amount,trade_type="buy"), trade_type="buy")
