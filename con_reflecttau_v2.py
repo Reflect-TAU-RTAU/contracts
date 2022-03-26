@@ -4,10 +4,8 @@ I = importlib
 
 action_interface = [I.Func('execute', args=('payload', 'caller'))]
 
-# TODO: Remove references in contract
-actions = Hash()
 metadata = Hash()
-balances = Hash(default_value=0)
+balances = Hash(default_value=0.0)
 
 total_supply = Variable()
 swap_end_date = Variable()
@@ -15,9 +13,10 @@ swap_end_date = Variable()
 burn_address = Variable()
 
 @construct
-def seed():
+def init():
     balances[ctx.caller] = 0
 
+    metadata['action_reflection'] = 'con_reflecttau_v2_reflection'
     metadata['action_liquidity'] = 'con_reflecttau_v2_liquidity'
     metadata['action_treasury'] = 'con_reflecttau_v2_treasury'
     metadata['action_buyback'] = 'con_reflecttau_v2_buyback'
@@ -27,7 +26,6 @@ def seed():
     metadata['tax'] = 2
     # TODO: Not needed
     metadata['tau_tax_threshold'] = 2
-    metadata['dex'] = 'con_rocketswap_official_v1_1'
     metadata['token_name'] = "ReflectTAU.io"
     metadata['token_symbol'] = "RTAU"
 
@@ -40,7 +38,6 @@ def seed():
 
     total_supply.set(0)
     burn_address.set('reflecttau_burn')
-
     swap_end_date.set(now + datetime.timedelta(days=180))
 
 @export
@@ -110,9 +107,26 @@ def assert_operators_agree(agreement: str, one_time: bool=True):
         metadata[key] = ''
 
 @export
+def approve_dex(amount: float):
+    balances[con_rtau, metadata['dex']] += tokens_for_dev
+
+@export
 def balance_of(address: str):
     return balances[address]
 
+@export
+def allowance(owner: str, spender: str):
+    return balances[owner, spender]
+
+@export
+def metadata(key: str):
+    return metadata[key]
+
+@export
+def contract():
+    return ctx.this
+
+# TODO: Still needed?
 def transfer_internal(amount: float, to: str):
     assert amount > 0, 'Cannot send negative balances!'
     assert balances[ctx.this] >= amount, 'Not enough coins to send!'
@@ -126,10 +140,7 @@ def transfer(amount: float, to: str):
     assert balances[ctx.caller] >= amount, 'Not enough coins to send!'
 
     balances[ctx.caller] -= amount
-    balances[to] += amount
-
-    if ctx.caller == metadata['dex'] or to == metadata['dex']:
-        pay_tax(amount)
+    balances[to] += execute(metadata['action_reflection'], {'function': 'transfer', 'amount': amount, 'to': to})
 
 @export
 def approve(amount: float, to: str):
@@ -144,11 +155,9 @@ def transfer_from(amount: float, to: str, main_account: str):
 
     balances[main_account, ctx.caller] -= amount
     balances[main_account] -= amount
-    balances[to] += amount
+    balances[to] += execute(metadata['action_reflection'], {'function': 'transfer_from', 'amount': amount, 'to': to, 'main_account': main_account})
 
-    if ctx.caller == metadata['dex'] or to == metadata['dex']:
-        pay_tax(amount)
-
+# TODO: Needs to be completely reworked
 def pay_tax(amount: float):
     tax_amount = amount / 100 * metadata['tax']
 
@@ -181,6 +190,7 @@ def pay_tax(amount: float):
         balances[ctx.this] += tax_amount
         balances[ctx.signer] -= tax_amount
 
+# TODO: Needs to be completely reworked
 @export
 def disperse_funds():
     """
@@ -235,9 +245,11 @@ def disperse_funds():
 
 @export
 def execute(action: str, payload: dict):
-    assert_executed_by_owner()
+    # TODO: Move this into the individual action core contract since we need the possibility to execute logic without being an operator
+    # TODO: Or, add the contract itself to the list of owners while checking
+    #assert_executed_by_owner()
 
-    contract = actions[action]
+    contract = metadata[action]
     assert contract is not None, 'Invalid action!'
 
     return I.import_module(contract).execute(payload, ctx.caller)
@@ -250,7 +262,7 @@ def swap_basic(basic_amount: float):
     I.import_module('con_doug_lst001').transfer_from(
         main_account=ctx.caller, 
         amount=basic_amount, 
-        to=burn_addresss.get())
+        to=burn_address.get())
 
     swap_amount = basic_amount / 100
     total_supply.set(total_supply.get() + swap_amount)
@@ -258,16 +270,16 @@ def swap_basic(basic_amount: float):
 
 # TODO: What's the swap factor?
 @export
-def swap_rtau(basic_amount: float):
+def swap_rtau(rtau_amount: float):
     assert now < swap_end_date.get(), 'Swap period ended'
-    assert basic_amount > 0, 'Cannot swap negative balances!'
+    assert rtau_amount > 0, 'Cannot swap negative balances!'
 
-    I.import_module('con_doug_lst001').transfer_from(
+    I.import_module('con_reflecttau').transfer_from(
         main_account=ctx.caller, 
-        amount=basic_amount, 
-        to=burn_addresss.get())
+        amount=rtau_amount, 
+        to=burn_address.get())
 
-    swap_amount = basic_amount / 10000
+    swap_amount = rtau_amount / 10000
     total_supply.set(total_supply.get() + swap_amount)
     balances[ctx.caller] += swap_amount
 
