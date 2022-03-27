@@ -1,16 +1,14 @@
 import currency as tau
-import con_reflecttau_v2 as save
+import con_reflecttau_v2 as rtau
 import con_rocketswap_official_v1_1 as rswp
-
-RTAU_CONTRACT = 'con_reflecttau_v2'
 
 @export
 def execute(payload: dict, caller: str):
-	assert ctx.caller == RTAU_CONTRACT, 'You are not allowed to do that'
+	assert ctx.caller == rtau.contract(), 'You are not allowed to do that'
 	return buyback_and_burn()
 
-# TODO: Import variable 'burn_address' from token contract
+# TODO: Do we need to approve sending TAU to rswp?
 def buyback_and_burn():
-	save_amount = rswp.buy(contract=RTAU_CONTRACT, amount=int(tau.balance_of(ctx.this)))
-	save.transfer(int(save.balance_of(ctx.this)), 'internal_save_burn')
-	return save_amount
+	rtau_amount = rswp.buy(contract=rtau.contract(), amount=tau.balance_of(ctx.this))
+	rtau.transfer(rtau_amount, rtau.burn_address())
+	return rtau_amount

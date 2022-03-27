@@ -36,7 +36,7 @@ def init():
         'TODO'
     ]
 
-    total_supply.set(0)
+    total_supply.set(0.0)
     burn_address.set('reflecttau_burn')
     swap_end_date.set(now + datetime.timedelta(days=180))
 
@@ -107,10 +107,6 @@ def assert_operators_agree(agreement: str, one_time: bool=True):
         metadata[key] = ''
 
 @export
-def approve_dex(amount: float):
-    balances[con_rtau, metadata['dex']] += tokens_for_dev
-
-@export
 def balance_of(address: str):
     return balances[address]
 
@@ -125,6 +121,16 @@ def metadata(key: str):
 @export
 def contract():
     return ctx.this
+
+@export
+def burn_address():
+    return burn_address.get()
+
+# TODO: Can we get rid of this?
+@export
+def add_balance_to_reflect_action(amount: float):
+    assert ctx.caller == metadata['action_reflection'], 'You are not allowed to do that'
+    balances[metadata['action_reflection']] += amount
 
 # TODO: Still needed?
 def transfer_internal(amount: float, to: str):
@@ -245,14 +251,8 @@ def disperse_funds():
 
 @export
 def execute(action: str, payload: dict):
-    # TODO: Move this into the individual action core contract since we need the possibility to execute logic without being an operator
-    # TODO: Or, add the contract itself to the list of owners while checking
-    #assert_executed_by_owner()
-
-    contract = metadata[action]
-    assert contract is not None, 'Invalid action!'
-
-    return I.import_module(contract).execute(payload, ctx.caller)
+    assert metadata[action] is not None, 'Invalid action!'
+    return I.import_module(metadata[action]).execute(payload, ctx.caller)
 
 @export
 def swap_basic(basic_amount: float):
@@ -289,8 +289,8 @@ def time_until_swap_end():
 
 @export
 def circulating_supply():
-    return int(total_supply.get() - balances[burn_address.get()])
+    return total_supply.get() - balances[burn_address.get()]
 
 @export
 def total_supply():
-    return int(total_supply.get())
+    return total_supply.get()

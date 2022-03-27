@@ -1,7 +1,9 @@
-# TODO: Needed?
+# TODO: Need to fix issue where users under specific amount of RTAU are not able to sell
+# TODO: Make sure that each holder with amount of RTAU gets reflections
+# TODO: Make threshold amount of RTAU for reflection adjustable
+
 import currency as tau
 import con_reflecttau_v2 as rtau
-# TODO: Needed?
 import con_rocketswap_official_v1_1 as rswp
 
 forward_holders_index = Hash(default_value=False)
@@ -21,6 +23,7 @@ def init():
     metadata['tau_pool'] = decimal(0)
     metadata['dex'] = 'con_rocketswap_official_v1_1'
 
+    # TODO: This means devs are in the reflection distribution directly?
     i = 1
     for op in rtau.metadata['operators']:
         forward_holders_index[i] = op
@@ -28,9 +31,14 @@ def init():
         holders_amount.set(i)
         i += 1
 
+    # Approve sending unlimited amount of TAU to developer action core contract for dev fees
+    tau.approve(amount=999_999_999_999_999_999, to=rtau.metadata('action_dev'))
+    # Approve sending unlimited amount of RTAU to DEX contract to be able to sell RTAU
+    rtau.approve(amount=999_999_999_999_999_999, to=metadata['dex'])
+
 @export
 def execute(payload: dict, caller: str):
-    assert ctx.caller == RTAU_CONTRACT, 'You are not allowed to do that'
+    assert ctx.caller == rtau.contract(), 'You are not allowed to do that'
 
 	if payload['function'] == 'transfer':
 	    return process_transfer(amount=payload['amount'], to=payload['to'], caller=caller)
@@ -50,7 +58,7 @@ def process_transfer(amount: float, to: str, caller: str, main_account: str=""):
     elif (to==metadata['dex'] and ctx.signer == main_account and metadata['is_initial_liq_ready']):
         amount -= process_taxes(taxes=calc_taxes(amount=amount,trade_type="sell"), trade_type="sell")
 
-        if (balances[main_account] > 1000000):
+        if (rtau.balance_of(main_account) > 1000000):
             if (reverse_holders_index[main_account] == False):
                 new_holders_amount = holders_amount.get() + 1
                 holders_amount.set(new_holders_amount)
@@ -70,41 +78,19 @@ def calc_taxes(amount: float, trade_type: str):
         return amount / 100 * metadata['sell_tax']
 
 def process_taxes(taxes: float, trade_type:str):
-	# TODO: Both methods make a sell. Needs to be one sell and then the TAU splitted
-    pay_dev_fee(amount=taxes)
-    pay_redistribute_tau(amount=taxes)
+    # TODO: Are we able to send it with 'rtau.transfer()' instead?
+    rtau.add_balance_to_reflect_action(taxes)
 
-    balances[con_rtau] += taxes
+    tokens_for_dev = taxes / 100 * metadata['dev_perc_of_tax']
+    tokens_for_ins = taxes / 100 * metadata['redistribute_perc']
     
+    tau_amount = rswp.sell(contract=rtau.contract(), token_amount=(tokens_for_dev + tokens_for_ins))
+    
+    tau.transfer(amount=(tau_amount / 100 * taxes) / 100 * metadata['dev_perc_of_tax'], to=rtau.metadata('action_dev'))
+    
+    metadata['tau_pool'] += (tau_amount / 100 * taxes) / 100 * metadata['redistribute_perc']
+
     return taxes
-
-# TODO: Needs to be rewritten to allow settings RTAU balance from outside of token contract
-def pay_dev_fee(amount: float):
-    tokens_for_dev = amount / 100 * metadata['dev_perc_of_tax']
-    
-    balances[con_rtau, metadata['dex']] += tokens_for_dev
-
-    currency_amount = I.import_module(metadata['dex']).sell(
-        contract=con_rtau, 
-        token_amount=tokens_for_dev
-    )
-
-	# TODO: Just send to developer action core contract and split later in there
-    currency.approve(amount=currency_amount,to=metadata['operator'])
-    currency.transfer(amount=currency_amount,to=metadata['operator'])
-
-# TODO: Needs to be rewritten to allow settings RTAU balance from outside of token contract
-def pay_redistribute_tau(amount: float):
-    tokens_for_ins = amount / 100 * metadata['redistribute_perc']
-    balances[con_rtau, metadata['dex']] += tokens_for_ins
-
-    metadata['tau_pool'] += I.import_module(metadata['dex']).sell(
-        contract=con_rtau, 
-        token_amount=tokens_for_ins
-    )
-
-def get_total_supply_without_rocketswap():
-    return total_supply.get() - balances[metadata['dex']]
 
 @export
 def redistribute_tau(start: int=0, end: int=0, reset_pool: bool=True):
@@ -114,9 +100,13 @@ def redistribute_tau(start: int=0, end: int=0, reset_pool: bool=True):
         start = 1
         end = holders_amount.get() + 1
 
+    # TODO: Don't we want to use 'rtau.circulating_supply()' here?
+    supply = rtau.total_supply() - rtau.balance_of(metadata['dex'])
+    holder_balance_share = rtau.balance_of([forward_holders_index[holder_id]]) / supply * 100
+
     for holder_id in range(start, end):
         if (forward_holders_index[holder_id] != False):
-            reflections[forward_holders_index[holder_id]] += metadata["tau_pool"] / 100 * (balances[forward_holders_index[holder_id]] / get_total_supply_without_rocketswap() * 100)
+            reflections[forward_holders_index[holder_id]] += metadata["tau_pool"] / 100 * holder_balance_share
 
     if reset_pool:
         metadata['tau_pool'] = decimal(0)
@@ -124,6 +114,6 @@ def redistribute_tau(start: int=0, end: int=0, reset_pool: bool=True):
 @export
 def claim_tau():
     assert reflections[ctx.caller] > 0, "There is nothing to claim"
-    currency.transfer(amount=reflections[ctx.caller], to=ctx.caller)
+    tau.transfer(amount=reflections[ctx.caller], to=ctx.caller)
     reflections[ctx.caller] = decimal(0)
 
