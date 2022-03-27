@@ -39,10 +39,9 @@ def init():
 @export
 def execute(payload: dict, caller: str):
     assert ctx.caller == rtau.contract(), 'You are not allowed to do that'
-
-	if payload['function'] == 'transfer':
+    if payload['function'] == 'transfer':
 	    return process_transfer(amount=payload['amount'], to=payload['to'], caller=caller)
-	if payload['function'] == 'transfer_from':
+    if payload['function'] == 'transfer_from':
 	    return process_transfer(amount=payload['amount'], to=payload['to'], caller=caller, main_account=payload['main_account'])
 
 def process_transfer(amount: float, to: str, caller: str, main_account: str=""):
