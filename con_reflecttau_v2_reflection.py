@@ -23,6 +23,10 @@ def init():
     metadata['tau_pool'] = decimal(0)
     metadata['dex'] = 'con_rocketswap_official_v1_1'
 
+    approve()
+
+@export
+def approve():
     # Approve sending unlimited amount of TAU to developer action core contract for dev fees
     tau.approve(amount=999_999_999_999_999_999, to=rtau.metadata('action_dev'))
     # Approve sending unlimited amount of RTAU to DEX contract to be able to sell RTAU
