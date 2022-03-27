@@ -8,7 +8,7 @@ import con_rocketswap_official_v1_1 as rswp
 
 forward_holders_index = Hash(default_value=False)
 reverse_holders_index = Hash(default_value=False)
-
+metadata = Hash()
 reflections = Hash(default_value=0.0)
 
 holders_amount = Variable()
