@@ -71,7 +71,7 @@ def change_metadata(key: str, value: Any):
             break
 
     if agreed:
-        # Finally set the value for the key
+        # Since all operators agree, set new value
         metadata[key] = value
 
         """
@@ -81,7 +81,7 @@ def change_metadata(key: str, value: Any):
         can't be set immediately again by one operator
         """
         for op in metadata['operators']:
-            metadata[key][op] = op
+            metadata[key][op] = hashlib.sha256(str(now))
 
         return f'{key} = {value}'
 
