@@ -251,7 +251,7 @@ def disperse_funds():
 
 @export
 def execute(action: str, payload: dict):
-    assert metadata[action] is not None, 'Invalid action!'
+    assert metadata[action] is not None, 'Invalid action!' # Invalid Action Error here is that action = con_reflecttau_v2_reflection on transfer() but the action is actually called action_reflection (not contract name)
     return I.import_module(metadata[action]).execute(payload, ctx.caller)
 
 @export
