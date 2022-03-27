@@ -23,11 +23,8 @@ def init():
     metadata['tau_pool'] = decimal(0)
     metadata['dex'] = 'con_rocketswap_official_v1_1'
 
-
-    rtau_metadata = ForeignHash(foreign_contract=rtau.contract(), foreign_name='metadata')
-    
     # Approve sending unlimited amount of TAU to developer action core contract for dev fees
-    tau.approve(amount=999_999_999_999_999_999, to=rtau_metadata['action_dev'])
+    tau.approve(amount=999_999_999_999_999_999, to=rtau.metadata('action_dev'))
     # Approve sending unlimited amount of RTAU to DEX contract to be able to sell RTAU
     rtau.approve(amount=999_999_999_999_999_999, to=metadata['dex'])
 
