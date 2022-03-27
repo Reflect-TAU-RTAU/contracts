@@ -24,6 +24,7 @@ def init():
     metadata['dex'] = 'con_rocketswap_official_v1_1'
 
     # TODO: This means devs are in the reflection distribution directly?
+    # this is only needed if the contract mints supply on deploy
     i = 1
     for op in rtau.metadata['operators']:
         forward_holders_index[i] = op
