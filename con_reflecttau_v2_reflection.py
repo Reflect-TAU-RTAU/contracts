@@ -6,10 +6,10 @@ import currency as tau
 import con_reflecttau_v2 as rtau
 import con_rocketswap_official_v1_1 as rswp
 
-forward_holders_index = Hash(default_value=False)
-reverse_holders_index = Hash(default_value=False)
 metadata = Hash()
 reflections = Hash(default_value=0.0)
+forward_holders_index = Hash(default_value=False)
+reverse_holders_index = Hash(default_value=False)
 
 holders_amount = Variable()
 
@@ -46,20 +46,18 @@ def process_transfer(amount: float, to: str, caller: str, main_account: str=""):
         amount -= process_taxes(taxes=calc_taxes(amount=amount,trade_type="buy"), trade_type="buy")
 
         if (reverse_holders_index[to] == False):
-            new_holders_amount = holders_amount.get() + 1
-            holders_amount.set(new_holders_amount)
-            forward_holders_index[new_holders_amount] = to
-            reverse_holders_index[to] = new_holders_amount
+            holders_amount.set(holders_amount.get() + 1)
+            forward_holders_index[holders_amount.get()] = to
+            reverse_holders_index[to] = holders_amount.get()
             
     elif (to==metadata['dex'] and ctx.signer == main_account and metadata['is_initial_liq_ready']):
         amount -= process_taxes(taxes=calc_taxes(amount=amount,trade_type="sell"), trade_type="sell")
 
         if (rtau.balance_of(main_account) > 1000000):
             if (reverse_holders_index[main_account] == False):
-                new_holders_amount = holders_amount.get() + 1
-                holders_amount.set(new_holders_amount)
-                forward_holders_index[new_holders_amount] = main_account
-                reverse_holders_index[main_account] = new_holders_amount
+                holders_amount.set(holders_amount.get() + 1)
+                forward_holders_index[holders_amount.get()] = main_account
+                reverse_holders_index[main_account] = holders_amount.get()
         else:
             if (reverse_holders_index[main_account] != False):
                 forward_holders_index[reverse_holders_index] = False
