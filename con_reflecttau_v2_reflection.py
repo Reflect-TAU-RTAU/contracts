@@ -25,15 +25,18 @@ def init():
 
     # TODO: This means devs are in the reflection distribution directly?
     # this is only needed if the contract mints supply on deploy
+
+    rtau_metadata = ForeignHash(foreign_contract=rtau.contract(), foreign_name='metadata')
     i = 1
-    for op in rtau.metadata['operators']:
+    for op in rtau_metadata['operators']:
         forward_holders_index[i] = op
         reverse_holders_index[op] = i
         holders_amount.set(i)
         i += 1
 
+    
     # Approve sending unlimited amount of TAU to developer action core contract for dev fees
-    tau.approve(amount=999_999_999_999_999_999, to=rtau.metadata('action_dev'))
+    tau.approve(amount=999_999_999_999_999_999, to=rtau_metadata['action_dev'])
     # Approve sending unlimited amount of RTAU to DEX contract to be able to sell RTAU
     rtau.approve(amount=999_999_999_999_999_999, to=metadata['dex'])
 
