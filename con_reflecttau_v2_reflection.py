@@ -36,32 +36,26 @@ def approve():
 def execute(payload: dict, caller: str):
     assert ctx.caller == rtau.contract(), 'You are not allowed to do that'
     if payload['function'] == 'transfer':
-	    return process_transfer(amount=payload['amount'], to=payload['to'], caller=caller)
+	    return process_transfer(payload['amount'], payload['to'], caller)
     if payload['function'] == 'transfer_from':
-	    return process_transfer(amount=payload['amount'], to=payload['to'], caller=caller, main_account=payload['main_account'])
+	    return process_transfer(payload['amount'], payload['to'], caller, payload['main_account'])
+    if payload['function'] == 'add_to_holders_index':
+        add_to_holders_index(payload['address'])
 
 # TODO: Burn address can't be in the holders index
 def process_transfer(amount: float, to: str, caller: str, main_account: str=""):
     if (caller == metadata['dex'] and to != rtau.contract() and main_account == "" and metadata['is_initial_liq_ready']):
-        amount -= process_taxes(taxes=calc_taxes(amount=amount,trade_type="buy"), trade_type="buy")
+        amount -= process_taxes(calc_taxes(amount, "buy"), "buy")
 
-        if (reverse_holders_index[to] == False):
-            holders_amount.set(holders_amount.get() + 1)
-            forward_holders_index[holders_amount.get()] = to
-            reverse_holders_index[to] = holders_amount.get()
+        add_to_holders_index(to)
             
     elif (to==metadata['dex'] and ctx.signer == main_account and metadata['is_initial_liq_ready']):
-        amount -= process_taxes(taxes=calc_taxes(amount=amount,trade_type="sell"), trade_type="sell")
+        amount -= process_taxes(calc_taxes(amount, "sell"), "sell")
 
-        if (rtau.balance_of(main_account) > 1000000):
-            if (reverse_holders_index[main_account] == False):
-                holders_amount.set(holders_amount.get() + 1)
-                forward_holders_index[holders_amount.get()] = main_account
-                reverse_holders_index[main_account] = holders_amount.get()
+        if (rtau.balance_of(main_account) > 1):
+            add_to_holders_index(main_account)
         else:
-            if (reverse_holders_index[main_account] != False):
-                forward_holders_index[reverse_holders_index] = False
-                reverse_holders_index[main_account] = False
+            remove_from_holders_index(main_account)
 
     return amount
 
@@ -85,6 +79,17 @@ def process_taxes(taxes: float, trade_type:str):
     metadata['tau_pool'] += (tau_amount / 100 * taxes) / 100 * metadata['redistribute_perc']
 
     return taxes
+
+def add_to_holders_index(address: str):
+    if (reverse_holders_index[address] == False):
+        holders_amount.set(holders_amount.get() + 1)
+        forward_holders_index[holders_amount.get()] = address
+        reverse_holders_index[address] = holders_amount.get()
+
+def remove_from_holders_index(address: str):
+    if (reverse_holders_index[main_account] != False):
+        forward_holders_index[reverse_holders_index] = False
+        reverse_holders_index[main_account] = False
 
 @export
 def redistribute_tau(start: int=0, end: int=0, reset_pool: bool=True):

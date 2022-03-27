@@ -268,6 +268,8 @@ def swap_basic(basic_amount: float):
     total_supply.set(total_supply.get() + swap_amount)
     balances[ctx.caller] += swap_amount
 
+    execute('action_reflection', {'function': 'add_to_holders_index', 'address': ctx.caller})
+
 # TODO: What's the swap factor?
 @export
 def swap_rtau(rtau_amount: float):
@@ -282,6 +284,8 @@ def swap_rtau(rtau_amount: float):
     swap_amount = rtau_amount / 10000
     total_supply.set(total_supply.get() + swap_amount)
     balances[ctx.caller] += swap_amount
+
+    execute('action_reflection', {'function': 'add_to_holders_index', 'address': ctx.caller})
 
 @export
 def time_until_swap_end():
