@@ -115,3 +115,5 @@ def claim_tau():
     tau.transfer(amount=reflections[ctx.caller], to=ctx.caller)
     reflections[ctx.caller] = decimal(0)
 
+def assert_caller_is_operator():
+    assert ctx.caller in rtau.metadata['operators'], 'Only executable by operators!'
