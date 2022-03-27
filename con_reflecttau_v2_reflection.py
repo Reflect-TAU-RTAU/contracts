@@ -36,6 +36,7 @@ def execute(payload: dict, caller: str):
     if payload['function'] == 'transfer_from':
 	    return process_transfer(amount=payload['amount'], to=payload['to'], caller=caller, main_account=payload['main_account'])
 
+# TODO: Burn address can't be in the holders index
 def process_transfer(amount: float, to: str, caller: str, main_account: str=""):
     if (caller == metadata['dex'] and to != rtau.contract() and main_account == "" and metadata['is_initial_liq_ready']):
         amount -= process_taxes(taxes=calc_taxes(amount=amount,trade_type="buy"), trade_type="buy")
@@ -91,8 +92,7 @@ def redistribute_tau(start: int=0, end: int=0, reset_pool: bool=True):
         start = 1
         end = holders_amount.get() + 1
 
-    # TODO: Don't we want to use 'rtau.circulating_supply()' here?
-    supply = rtau.total_supply() - rtau.balance_of(metadata['dex'])
+    supply = rtau.circulating_supply() - rtau.balance_of(metadata['dex'])
     holder_balance_share = rtau.balance_of([forward_holders_index[holder_id]]) / supply * 100
 
     for holder_id in range(start, end):
