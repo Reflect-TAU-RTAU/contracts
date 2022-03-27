@@ -146,7 +146,7 @@ def transfer(amount: float, to: str):
     assert balances[ctx.caller] >= amount, 'Not enough coins to send!'
 
     balances[ctx.caller] -= amount
-    balances[to] += execute(metadata['action_reflection'], {'function': 'transfer', 'amount': amount, 'to': to})
+    balances[to] += execute('action_reflection', {'function': 'transfer', 'amount': amount, 'to': to})
 
 @export
 def approve(amount: float, to: str):
@@ -161,7 +161,7 @@ def transfer_from(amount: float, to: str, main_account: str):
 
     balances[main_account, ctx.caller] -= amount
     balances[main_account] -= amount
-    balances[to] += execute(metadata['action_reflection'], {'function': 'transfer_from', 'amount': amount, 'to': to, 'main_account': main_account})
+    balances[to] += execute('action_reflection', {'function': 'transfer_from', 'amount': amount, 'to': to, 'main_account': main_account})
 
 # TODO: Needs to be completely reworked
 def pay_tax(amount: float):
@@ -251,7 +251,7 @@ def disperse_funds():
 
 @export
 def execute(action: str, payload: dict):
-    assert metadata[action] is not None, 'Invalid action!' # Invalid Action Error here is that action = con_reflecttau_v2_reflection on transfer() but the action is actually called action_reflection (not contract name)
+    assert metadata[action] is not None, 'Invalid action!'
     return I.import_module(metadata[action]).execute(payload, ctx.caller)
 
 @export
