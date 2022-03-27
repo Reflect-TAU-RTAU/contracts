@@ -13,6 +13,7 @@ class MyTestCase(unittest.TestCase):
     reflecttau_v2_buyback = None
     reflecttau_v2_developer = None
     reflecttau_v2_liquidity = None
+    reflecttau_v2_reflection = None
     reflecttau_v2_treasury = None
     rocketswap = None
     rswp_token = None
@@ -46,6 +47,10 @@ class MyTestCase(unittest.TestCase):
             code = f.read()
             self.c.submit(code, name="con_reflecttau_v2")
 
+        with open("../reflecttau_v2_reflection.py") as f:
+            code = f.read()
+            self.c.submit(code, name="reflecttau_v2_reflection")
+
         with open("../con_reflecttau_v2_buyback.py") as f:
             code = f.read()
             self.c.submit(code, name="con_reflecttau_v2_buyback")
@@ -67,6 +72,7 @@ class MyTestCase(unittest.TestCase):
         self.reflecttau = self.c.get_contract("con_reflecttau")
         self.basic = self.c.get_contract("con_doug_lst001")
         self.reflecttau_v2 = self.c.get_contract("con_reflecttau_v2")
+        self.reflecttau_v2_reflection = self.c.get_contract("reflecttau_v2_reflection")
         self.reflecttau_v2_buyback = self.c.get_contract("con_reflecttau_v2_buyback")
         self.reflecttau_v2_developer = self.c.get_contract("con_reflecttau_v2_developer")
         self.reflecttau_v2_liquidity = self.c.get_contract("con_reflecttau_v2_liquidity")
