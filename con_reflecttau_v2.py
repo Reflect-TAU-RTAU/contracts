@@ -43,7 +43,6 @@ def init():
 @export
 def change_metadata(key: str, value: Any):
     assert ctx.caller in metadata['operators'], 'Only executable by operators!'
-    assert key.lower() != 'operators', 'Can not change owners'
     assert value, 'Parameter "value" can not be empty'
 
     """
