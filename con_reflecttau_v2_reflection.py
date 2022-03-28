@@ -22,6 +22,7 @@ def init():
     metadata['is_initial_liq_ready'] = False
     metadata['tau_pool'] = decimal(0)
     metadata['dex'] = 'con_rocketswap_official_v1_1'
+    metadata['balance_limit'] = decimal(1_000_000)
 
     holders_amount.set(0)
 
@@ -33,6 +34,8 @@ def approve():
     tau.approve(amount=999_999_999_999_999_999, to=rtau.metadata('action_dev'))
     # Approve sending unlimited amount of RTAU to DEX contract to be able to sell RTAU
     rtau.approve(amount=999_999_999_999_999_999, to=metadata['dex'])
+
+# TODO: Add 'change_metadata' function and reference logic from main token contract
 
 @export
 def execute(payload: dict, caller: str):
@@ -46,17 +49,24 @@ def execute(payload: dict, caller: str):
 
 # TODO: Burn address can't be in the holders index
 def process_transfer(amount: float, to: str, caller: str, main_account: str=""):
-    if (caller == metadata['dex'] and to != ctx.this and main_account == "" and metadata['is_initial_liq_ready']):
-        amount -= process_taxes(calc_taxes(amount, "buy"), "buy")
-        add_to_holders_index(to)
-            
-    elif (to==metadata['dex'] and ctx.signer == main_account and metadata['is_initial_liq_ready']):
-        amount -= process_taxes(calc_taxes(amount, "sell"), "sell")
+    # TODO: Add liquidity through liquidity action core
+    # TODO: Set and move metadata['is_initial_liq_ready'] in liquidity action
+    if metadata['is_initial_liq_ready']:
+        # TODO: Set adding / removing from holders index correctly on each transfer?
 
-        if (rtau.balance_of(main_account) > 1):
-            add_to_holders_index(main_account)
-        else:
-            remove_from_holders_index(main_account)
+        # DEX Buy
+        if (caller == metadata['dex'] and to != ctx.this and main_account == ""):
+            amount -= process_taxes(calc_taxes(amount, "buy"))
+            add_to_holders_index(to)
+
+        # DEX Sell
+        elif (to==metadata['dex'] and ctx.signer == main_account):
+            amount -= process_taxes(calc_taxes(amount, "sell"))
+
+            if (rtau.balance_of(main_account) >= metadata['balance_limit']):
+                add_to_holders_index(main_account)
+            else:
+                remove_from_holders_index(main_account)
 
     return amount
 
@@ -66,7 +76,7 @@ def calc_taxes(amount: float, trade_type: str):
     elif(trade_type == "sell"):
         return amount / 100 * metadata['sell_tax']
 
-def process_taxes(taxes: float, trade_type:str):
+def process_taxes(taxes: float):
     # TODO: Are we able to send it with 'rtau.transfer()' instead?
     rtau.add_balance_to_reflect_action(amount=taxes)
 
@@ -85,22 +95,24 @@ def add_to_holders_index(address: str):
         reverse_holders_index[address] = holders_amount.get()
 
 def remove_from_holders_index(address: str):
-    if (reverse_holders_index[main_account] != False):
+    if (reverse_holders_index[address] != False):
         forward_holders_index[reverse_holders_index] = False
-        reverse_holders_index[main_account] = False
+        reverse_holders_index[address] = False
 
 @export
 def redistribute_tau(start: int=0, end: int=0, reset_pool: bool=True):
     assert_caller_is_operator()
 
-    if start == None and end == None: # wtf this is None and not default 0
+    # TODO: wtf this is None and not default 0
+    if start == None and end == None:
         start = 1
         end = holders_amount.get() + 1
 
     supply = rtau.circulating_supply() - rtau.balance_of(metadata['dex'])
+
     for holder_id in range(start, end):
-        holder_balance_share = rtau.balance_of(address=forward_holders_index[holder_id]) / supply * 100
         if (forward_holders_index[holder_id] != False):
+            holder_balance_share = rtau.balance_of([forward_holders_index[holder_id]]) / supply * 100
             reflections[forward_holders_index[holder_id]] += metadata["tau_pool"] / 100 * holder_balance_share
 
     if reset_pool:
