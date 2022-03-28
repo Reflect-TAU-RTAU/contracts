@@ -11,6 +11,7 @@ total_supply = Variable()
 swap_end_date = Variable()
 
 burn_address = Variable()
+contract = Variable()
 
 @construct
 def init():
@@ -22,10 +23,6 @@ def init():
     metadata['action_buyback'] = 'con_reflecttau_v2_buyback'
     metadata['action_dev'] = 'con_reflecttau_v2_developer'
 
-    # TODO: Not needed
-    metadata['tax'] = 2
-    # TODO: Not needed
-    metadata['tau_tax_threshold'] = 2
     metadata['token_name'] = "ReflectTAU.io"
     metadata['token_symbol'] = "RTAU"
 
@@ -37,9 +34,9 @@ def init():
     ]
 
     total_supply.set(0.0)
-    burn_address.set('reflecttau_burn')
+    burn_address.set('reflecttau_burn_address')
     swap_end_date.set(now + datetime.timedelta(days=180))
-    
+    contract.set(ctx.this)
 
 @export
 def change_metadata(key: str, value: Any):
@@ -119,7 +116,7 @@ def metadata(key: str):
 
 @export
 def contract():
-    return ctx.this
+    return contract.get()
 
 @export
 def burn_address():
@@ -161,92 +158,6 @@ def transfer_from(amount: float, to: str, main_account: str):
     balances[main_account, ctx.caller] -= amount
     balances[main_account] -= amount
     balances[to] += execute('action_reflection', {'function': 'transfer_from', 'amount': amount, 'to': to, 'main_account': main_account})
-
-# TODO: Needs to be completely reworked
-def pay_tax(amount: float):
-    tax_amount = amount / 100 * metadata['tax']
-
-    if tax_amount > 0:
-        prices = ForeignHash(
-            foreign_contract=metadata['dex'], 
-            foreign_name='prices')
-
-        if not prices[ctx.this]:
-            return
-
-        tau_tax = tax_amount * prices[ctx.this]
-        tau_balance = tau.balance_of(ctx.signer)
-
-        missing = tau_tax - tau_balance
-        error = f'Not enough TAU to pay tax. Missing {missing} TAU'
-        assert tau_balance >= tau_tax, error
-
-        # TAU tax
-        tau.transfer_from(
-            main_account=ctx.signer, 
-            amount=tau_tax, 
-            to=ctx.this)
-
-        missing = tax_amount - balances[ctx.signer]
-        error = f'Not enough {metadata["token_symbol"]} to pay tax. Missing {missing} {metadata["token_symbol"]}'
-        assert balances[ctx.signer] >= tax_amount, error
-
-        # SAVE tax
-        balances[ctx.this] += tax_amount
-        balances[ctx.signer] -= tax_amount
-
-# TODO: Needs to be completely reworked
-@export
-def disperse_funds():
-    """
-    50% TAU --> liquidity
-    25% TAU --> buyback & burn
-    25% TAU --> treasury
-
-    50% SAVE --> liquidity
-    25% SAVE --> staking
-    25% SAVE --> devs
-    """
-
-    assert actions['liquidity'], 'No action set for "liquidity"'
-    assert actions['buyback'], 'No action set for "buyback"'
-    assert actions['treasury'], 'No action set for "treasury"'
-    assert actions['staking'], 'No action set for "staking"'
-
-    tau_balance = int(tau.balance_of(ctx.this))
-
-    if tau_balance < metadata['tau_tax_threshold']:
-        return
-
-    # TAU Liquidity
-    tau_liq_share = tau_balance / 2
-    tau.transfer(tau_liq_share, actions['liquidity'])
-    tau_balance -= tau_liq_share
-
-    # TAU Buyback & Burn
-    tau_buyback_share = tau_balance / 2
-    tau.transfer(tau_buyback_share, actions['buyback'])
-    tau_balance -= tau_buyback_share    
-
-    # TAU Treasury
-    tau.transfer(tau_balance, actions['treasury'])
-
-    save_balance = int(balances[ctx.this])
-
-    save_liq_share = save_balance / 2
-    save_balance -= save_liq_share
-
-    # SAVE Liquidity
-    transfer_internal(save_liq_share, actions['liquidity'])
-
-    save_staking_share = save_balance / 2
-    save_balance -= save_staking_share
-
-    # SAVE Staking
-    transfer_internal(save_staking_share, actions['staking'])
-
-    # SAVE Dev funds
-    transfer_internal(save_balance, actions['treasury'])
 
 def execute(action: str, payload: dict):
     assert metadata[action] is not None, 'Invalid action!'
