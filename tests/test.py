@@ -88,8 +88,8 @@ class MyTestCase(unittest.TestCase):
 
         logging.debug("\x1b[33;20m1. TEST SWAP BASIC TO RTAU V2 TOKEN\x1b[0m")
         logging.debug("Approving 1000 BASIC to con_reflecttau_v2")
-        self.basic.approve(amount=1000,to="con_reflecttau_v2")
-        logging.debug("Swapped 10 BASIC to (RETURN VALUE) " + str(self.reflecttau_v2.swap_basic(basic_amount=1000)) + "/ (REAL NEW ADDRESS BALANCE) "+ str(self.reflecttau_v2.balance_of(address=self.c.signer))+" RTAU V2")
+        self.basic.approve(amount=1000000,to="con_reflecttau_v2")
+        logging.debug("Swapped 10 BASIC to (RETURN VALUE) " + str(self.reflecttau_v2.swap_basic(basic_amount=1000000)) + "/ (REAL NEW ADDRESS BALANCE) "+ str(self.reflecttau_v2.balance_of(address=self.c.signer))+" RTAU V2")
 
         logging.debug("\x1b[33;20m2. TEST SWAP RTAU TO RTAU V2 TOKEN\x1b[0m-")
         logging.debug("Approving 1000 RTAU to con_reflecttau_v2")
@@ -112,11 +112,11 @@ class MyTestCase(unittest.TestCase):
 
         
         logging.debug("\x1b[33;20m6. TEST CREATE PAIR RTAU V2\x1b[0m")
-        self.reflecttau_v2.approve(amount=1,to="con_rocketswap_official_v1_1")
-        self.currency.approve(amount=3,to="con_rocketswap_official_v1_1")
+        self.reflecttau_v2.approve(amount=1000,to="con_rocketswap_official_v1_1")
+        self.currency.approve(amount=201,to="con_rocketswap_official_v1_1")
         self.rswp_token.approve(amount=1,to="con_rocketswap_official_v1_1")
         logging.debug("Useless RSWP Pair created (Has to exist for Rocketswap to work): " + str(self.rocketswap.create_market(contract="con_rswp_lst001",currency_amount=1,token_amount=1)))
-        logging.debug("RTAU V2 Pair created: " + str(self.rocketswap.create_market(contract="con_reflecttau_v2",currency_amount=2,token_amount=1)))
+        logging.debug("RTAU V2 Pair created: " + str(self.rocketswap.create_market(contract="con_reflecttau_v2",currency_amount=200,token_amount=1000)))
 
         logging.debug("Setting metadata['is_initial_liq_ready'] to True")
         self.reflecttau_v2_reflection.set_initial_liq(state=True)
