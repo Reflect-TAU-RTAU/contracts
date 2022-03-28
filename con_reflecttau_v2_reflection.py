@@ -69,10 +69,8 @@ def calc_taxes(amount: float, trade_type: str):
 def process_taxes(taxes: float, trade_type:str):
     # TODO: Are we able to send it with 'rtau.transfer()' instead?
     rtau.add_balance_to_reflect_action(amount=taxes)
-    tokens_for_dev = taxes / 100 * metadata['dev_perc_of_tax']
-    tokens_for_ins = taxes / 100 * metadata['redistribute_perc']
-    
-    tau_amount = rswp.sell(contract=rtau.contract(), token_amount=(tokens_for_dev + tokens_for_ins)) # 
+
+    tau_amount = rswp.sell(contract=rtau.contract(), token_amount=taxes) # 
     #ROCKETSWAP USES ctx.caller on arg 'to' here when its doing transfer(), so TAU is somehow send to con_reflecttau_v2 instead of reflection contract
     # but we need the tau in reflection contract for the transfer in next line
     
