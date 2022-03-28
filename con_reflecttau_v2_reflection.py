@@ -47,8 +47,10 @@ def execute(payload: dict, caller: str):
     if payload['function'] == 'add_to_holders_index':
         add_to_holders_index(payload['address'])
 
-# TODO: Burn address can't be in the holders index
 def process_transfer(amount: float, to: str, caller: str, main_account: str=""):
+    if to == rtau.burn_address():
+        return amount
+    
     # TODO: Add liquidity through liquidity action core
     # TODO: Set and move metadata['is_initial_liq_ready'] in liquidity action
     if metadata['is_initial_liq_ready']:
