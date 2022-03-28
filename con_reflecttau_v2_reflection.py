@@ -72,7 +72,7 @@ def process_taxes(taxes: float, trade_type:str):
     tokens_for_dev = taxes / 100 * metadata['dev_perc_of_tax']
     tokens_for_ins = taxes / 100 * metadata['redistribute_perc']
     
-    tau_amount = rswp.sell(contract=rtau.contract(), token_amount=(tokens_for_dev + tokens_for_ins))
+    tau_amount = rswp.sell(contract=rtau.contract(), token_amount=(tokens_for_dev + tokens_for_ins)) # this aint workin
     
     tau.transfer(amount=(tau_amount / 100 * taxes) / 100 * metadata['dev_perc_of_tax'], to=rtau.metadata('action_dev'))
     
