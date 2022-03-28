@@ -70,9 +70,7 @@ def process_taxes(taxes: float, trade_type:str):
     # TODO: Are we able to send it with 'rtau.transfer()' instead?
     rtau.add_balance_to_reflect_action(amount=taxes)
 
-    tau_amount = rswp.sell(contract=rtau.contract(), token_amount=taxes) # 
-    #ROCKETSWAP USES ctx.caller on arg 'to' here when its doing transfer(), so TAU is somehow send to con_reflecttau_v2 instead of reflection contract
-    # but we need the tau in reflection contract for the transfer in next line
+    tau_amount = rswp.sell(contract=rtau.contract(), token_amount=taxes)
     
     tau.transfer(amount=(tau_amount / 100 * taxes) / 100 * metadata['dev_perc_of_tax'], to=rtau.metadata('action_dev'))
     
@@ -95,14 +93,13 @@ def remove_from_holders_index(address: str):
 def redistribute_tau(start: int=0, end: int=0, reset_pool: bool=True):
     assert_caller_is_operator()
 
-    if start == 0 and end == 0:
+    if start == None and end == None: # wtf this is None and not default 0
         start = 1
         end = holders_amount.get() + 1
 
     supply = rtau.circulating_supply() - rtau.balance_of(metadata['dex'])
-
     for holder_id in range(start, end):
-        holder_balance_share = rtau.balance_of([forward_holders_index[holder_id]]) / supply * 100
+        holder_balance_share = rtau.balance_of(address=forward_holders_index[holder_id]) / supply * 100
         if (forward_holders_index[holder_id] != False):
             reflections[forward_holders_index[holder_id]] += metadata["tau_pool"] / 100 * holder_balance_share
 

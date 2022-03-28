@@ -39,6 +39,7 @@ def init():
     total_supply.set(0.0)
     burn_address.set('reflecttau_burn')
     swap_end_date.set(now + datetime.timedelta(days=180))
+    
 
 @export
 def change_metadata(key: str, value: Any):
@@ -247,7 +248,6 @@ def disperse_funds():
     # SAVE Dev funds
     transfer_internal(save_balance, actions['treasury'])
 
-@export
 def execute(action: str, payload: dict):
     assert metadata[action] is not None, 'Invalid action!'
     return I.import_module(metadata[action]).execute(payload, ctx.caller)

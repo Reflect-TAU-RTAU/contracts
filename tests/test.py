@@ -148,7 +148,10 @@ class MyTestCase(unittest.TestCase):
         logging.debug("\x1b[33;20m9. REDISTRIBUTE RTAU V2\x1b[0m")
         logging.debug("User has " + str(self.currency.balance_of(account=self.c.signer)) + " TAU before REDISTRIBUTE")
         self.reflecttau_v2_reflection.redistribute_tau()
-        
+        logging.debug("\x1b[33;20m REFLECTION HASH RTAU V2\x1b[0m")
+        logging.debug(self.reflecttau_v2_reflection.reflections.all())
+        self.reflecttau_v2_reflection.claim_tau()
+        logging.debug("User has " + str(self.currency.balance_of(account=self.c.signer)) + " TAU after REDISTRIBUTE AND CLAIM")
 
         #self.currency.approve(amount=4,to="con_rocketswap_official_v1_1",signer="hax")
         #self.reflecttau_v2.approve(amount=990090000,to="con_rocketswap_official_v1_1")
