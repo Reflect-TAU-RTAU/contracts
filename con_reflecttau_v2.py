@@ -32,7 +32,7 @@ def init():
     # TODO: Set real addresses
     metadata['operators'] = [
         'ae7d14d6d9b8443f881ba6244727b69b681010e782d4fe482dbfb0b6aca02d5d',
-        '6a9004cbc570592c21879e5ee319c754b9b7bf0278878b1cc21ac87eed0ee38d',
+        'ff61544ea94eaaeb5df08ed863c4a938e9129aba6ceee5f31b6681bdede11b89',
         'TODO'
     ]
 

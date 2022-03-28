@@ -108,8 +108,7 @@ class MyTestCase(unittest.TestCase):
         self.reflecttau_v2.transfer_from(amount=1, to="hax", main_account="ff61544ea94eaaeb5df08ed863c4a938e9129aba6ceee5f31b6681bdede11b89")
         logging.debug("Transfered 1 RTAU V2 to Address: hax with (REAL NEW RECEIVER ADDRESS BALANCE): "+ str(self.reflecttau_v2.balance_of(address="hax"))+" RTAU V2")
 
-        logging.debug("\x1b[33;20m5. TEST DISPERSE FUNDS RTAU V2\x1b[0m")
-        logging.debug("Dispersed " + str(self.reflecttau_v2.disperse_funds()) +" TAU")
+        
 
         
         logging.debug("\x1b[33;20m6. TEST CREATE PAIR RTAU V2\x1b[0m")
@@ -129,6 +128,21 @@ class MyTestCase(unittest.TestCase):
         self.reflecttau_v2.approve(amount=1,to="con_rocketswap_official_v1_1")
         logging.debug("Sold for: " + str(self.rocketswap.sell(contract="con_reflecttau_v2", token_amount=1)) + " TAU")
         logging.debug("User now has: " + str(self.reflecttau_v2.balance_of(address=self.c.signer)) + " RTAU V2 and " + str(self.currency.balance_of(account=self.c.signer)) + " TAU")
+
+        logging.debug("\x1b[33;20mINFO RTAU V2\x1b[0m")
+        logging.debug("\x1b[33;20m FORWARD INDEX RTAU V2\x1b[0m")
+        logging.debug(self.reflecttau_v2_reflection.forward_holders_index.all())
+        logging.debug("\x1b[33;20m REVERSE INDEX RTAU V2\x1b[0m")
+        logging.debug(self.reflecttau_v2_reflection.reverse_holders_index.all())
+        logging.debug("\x1b[33;20m HOLDERS AMOUNT RTAU V2\x1b[0m")
+        logging.debug(self.reflecttau_v2_reflection.holders_amount.get())
+        logging.debug("\x1b[33;20m TAU POOL RTAU V2\x1b[0m")
+        logging.debug(self.reflecttau_v2_reflection.metadata['tau_pool'])
+
+        logging.debug("\x1b[33;20m9. REDISTRIBUTE RTAU V2\x1b[0m")
+        logging.debug("User has " + str(self.currency.balance_of(account=self.c.signer)) + " TAU before REDISTRIBUTE")
+        self.reflecttau_v2_reflection.redistribute_tau()
+        
 
         #self.currency.approve(amount=4,to="con_rocketswap_official_v1_1",signer="hax")
         #self.reflecttau_v2.approve(amount=990090000,to="con_rocketswap_official_v1_1")

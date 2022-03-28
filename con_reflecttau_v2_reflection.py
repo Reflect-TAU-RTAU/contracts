@@ -102,9 +102,9 @@ def redistribute_tau(start: int=0, end: int=0, reset_pool: bool=True):
         end = holders_amount.get() + 1
 
     supply = rtau.circulating_supply() - rtau.balance_of(metadata['dex'])
-    holder_balance_share = rtau.balance_of([forward_holders_index[holder_id]]) / supply * 100
 
     for holder_id in range(start, end):
+        holder_balance_share = rtau.balance_of([forward_holders_index[holder_id]]) / supply * 100
         if (forward_holders_index[holder_id] != False):
             reflections[forward_holders_index[holder_id]] += metadata["tau_pool"] / 100 * holder_balance_share
 
@@ -118,4 +118,4 @@ def claim_tau():
     reflections[ctx.caller] = decimal(0)
 
 def assert_caller_is_operator():
-    assert ctx.caller in rtau.metadata['operators'], 'Only executable by operators!'
+    assert ctx.caller in rtau.metadata('operators'), 'Only executable by operators!'
