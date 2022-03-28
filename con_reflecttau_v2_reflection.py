@@ -23,6 +23,8 @@ def init():
     metadata['tau_pool'] = decimal(0)
     metadata['dex'] = 'con_rocketswap_official_v1_1'
 
+    holders_amount.set(0)
+
     approve()
 
 @export
