@@ -118,6 +118,9 @@ class MyTestCase(unittest.TestCase):
         logging.debug("Useless RSWP Pair created (Has to exist for Rocketswap to work): " + str(self.rocketswap.create_market(contract="con_rswp_lst001",currency_amount=1,token_amount=1)))
         logging.debug("RTAU V2 Pair created: " + str(self.rocketswap.create_market(contract="con_reflecttau_v2",currency_amount=2,token_amount=1)))
 
+        logging.debug("Setting metadata['is_initial_liq_ready'] to True")
+        self.reflecttau_v2_reflection.change_metadata(key="is_initial_liq_ready", value=True)
+
         logging.debug("\x1b[33;20m7. TEST BUY RTAU V2\x1b[0m")
         self.currency.approve(amount=1,to="con_rocketswap_official_v1_1")
         logging.debug("Purchased: " + str(self.rocketswap.buy(contract="con_reflecttau_v2", currency_amount=1)) + " RTAU V2")
