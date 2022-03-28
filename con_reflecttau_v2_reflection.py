@@ -46,9 +46,8 @@ def execute(payload: dict, caller: str):
 
 # TODO: Burn address can't be in the holders index
 def process_transfer(amount: float, to: str, caller: str, main_account: str=""):
-    if (caller == metadata['dex'] and to != rtau.contract() and main_account == "" and metadata['is_initial_liq_ready']):
+    if (caller == metadata['dex'] and to != ctx.this and main_account == "" and metadata['is_initial_liq_ready']):
         amount -= process_taxes(calc_taxes(amount, "buy"), "buy")
-
         add_to_holders_index(to)
             
     elif (to==metadata['dex'] and ctx.signer == main_account and metadata['is_initial_liq_ready']):
@@ -69,8 +68,7 @@ def calc_taxes(amount: float, trade_type: str):
 
 def process_taxes(taxes: float, trade_type:str):
     # TODO: Are we able to send it with 'rtau.transfer()' instead?
-    rtau.add_balance_to_reflect_action(taxes)
-
+    rtau.add_balance_to_reflect_action(amount=taxes)
     tokens_for_dev = taxes / 100 * metadata['dev_perc_of_tax']
     tokens_for_ins = taxes / 100 * metadata['redistribute_perc']
     
@@ -116,6 +114,12 @@ def claim_tau():
     assert reflections[ctx.caller] > 0, "There is nothing to claim"
     tau.transfer(amount=reflections[ctx.caller], to=ctx.caller)
     reflections[ctx.caller] = decimal(0)
+
+#TODO: remove maybe
+@export
+def set_initial_liq(state: bool):
+    assert_caller_is_operator()
+    metadata['is_initial_liq_ready'] = state
 
 def assert_caller_is_operator():
     assert ctx.caller in rtau.metadata('operators'), 'Only executable by operators!'

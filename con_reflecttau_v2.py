@@ -124,7 +124,7 @@ def contract():
 def burn_address():
     return burn_address.get()
 
-# TODO: Can we get rid of this?
+# TODO: Can we get rid of this? not really, its used
 @export
 def add_balance_to_reflect_action(amount: float):
     assert ctx.caller == metadata['action_reflection'], 'You are not allowed to do that'
@@ -155,7 +155,7 @@ def approve(amount: float, to: str):
 def transfer_from(amount: float, to: str, main_account: str):
     assert amount > 0, 'Cannot send negative balances!'
     assert balances[main_account, ctx.caller] >= amount, f'You approved {balances[main_account, ctx.caller]} but need {amount}'
-    assert balances[main_account] >= amount, 'Not enough coins to send!'
+    assert balances[main_account] >= amount, 'Not enough coins to send! '
 
     balances[main_account, ctx.caller] -= amount
     balances[main_account] -= amount
