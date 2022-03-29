@@ -7,6 +7,7 @@ def execute(payload: dict, caller: str):
 
 	if payload['function'] == 'distribute_tau_share':
 		return distribute_tau_share()
+		
 	if payload['function'] == 'distribute_rtau_share':
 		return distribute_rtau_share()
 
@@ -18,6 +19,8 @@ def distribute_tau_share():
 	for op in rtau.metadata['operators']:
 		tau.transfer(amount, ctx.signer)
 
+	return f'{individual_amount}'
+
 def distribute_rtau_share():
 	total_amount = rtau.balance_of(ctx.this)
 	shareholders = len(rtau.metadata['operators'])
@@ -25,3 +28,5 @@ def distribute_rtau_share():
 
 	for op in rtau.metadata['operators']:
 		rtau.transfer(amount, ctx.signer)
+
+	return f'{individual_amount}'
