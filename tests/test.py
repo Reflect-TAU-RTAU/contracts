@@ -116,10 +116,15 @@ class MyTestCase(unittest.TestCase):
         self.currency.approve(amount=201,to="con_rocketswap_official_v1_1")
         self.rswp_token.approve(amount=1,to="con_rocketswap_official_v1_1")
         logging.debug("Useless RSWP Pair created (Has to exist for Rocketswap to work): " + str(self.rocketswap.create_market(contract="con_rswp_lst001",currency_amount=1,token_amount=1)))
-        logging.debug("RTAU V2 Pair created: " + str(self.rocketswap.create_market(contract="con_reflecttau_v2",currency_amount=200,token_amount=1000)))
+        
 
-        logging.debug("Setting metadata['is_initial_liq_ready'] to True")
-        self.reflecttau_v2_reflection.set_initial_liq(state=True)
+        self.reflecttau_v2.approve(amount=1000,to="con_reflecttau_v2_liquidity")
+        self.currency.approve(amount=201,to="con_reflecttau_v2_liquidity")
+        logging.debug("Depositing RTAU to Liq contract " + str(self.reflecttau_v2_liquidity.deposit_rtau(amount=1000)))
+        logging.debug("Depositing TAU to Liq contract " + str(self.reflecttau_v2_liquidity.deposit_tau(amount=200)))
+        logging.debug("RTAU V2 Pair created: " + str(self.reflecttau_v2_liquidity.create_market(tau_amount=200,token_amount=1000)))
+        logging.debug("Sync Liq State: " + str(self.reflecttau_v2_reflection.sync_initial_liq_state()))
+        
 
         logging.debug("\x1b[33;20m7. TEST BUY RTAU V2\x1b[0m")
         self.currency.approve(amount=1,to="con_rocketswap_official_v1_1")
@@ -152,6 +157,20 @@ class MyTestCase(unittest.TestCase):
         logging.debug(self.reflecttau_v2_reflection.reflections.all())
         self.reflecttau_v2_reflection.claim_tau()
         logging.debug("User has " + str(self.currency.balance_of(account=self.c.signer)) + " TAU after REDISTRIBUTE AND CLAIM")
+
+        logging.debug("\x1b[33;20m10. TEST SELL EVERYTHING RTAU (SHOULD REMOVE FROM HOLDERS) V2\x1b[0m")
+        self.reflecttau_v2.approve(amount=10000,to="con_rocketswap_official_v1_1")
+        logging.debug("Sold for: " + str(self.rocketswap.sell(contract="con_reflecttau_v2", token_amount=3000)) + " TAU")
+        logging.debug("User now has: " + str(self.reflecttau_v2.balance_of(address=self.c.signer)) + " RTAU V2 and " + str(self.currency.balance_of(account=self.c.signer)) + " TAU")
+        logging.debug("Contract now has: " + str(self.currency.balance_of(account="con_reflecttau_v2_reflection")) + " TAU")
+        logging.debug("Contract now has (metadata['tau_pool']): " + str(self.reflecttau_v2_reflection.metadata["tau_pool"]) + " TAU")
+
+        # logging.debug("\x1b[33;20m10. TEST SELL EVERYTHING RTAU (SHOULD REMOVE FROM HOLDERS) V2\x1b[0m")
+        # self.reflecttau_v2.approve(amount=10000,to="con_rocketswap_official_v1_1")
+        # logging.debug("Sold for: " + str(self.rocketswap.sell(contract="con_reflecttau_v2", token_amount=8001)) + " TAU")
+        # logging.debug("User now has: " + str(self.reflecttau_v2.balance_of(address=self.c.signer)) + " RTAU V2 and " + str(self.currency.balance_of(account=self.c.signer)) + " TAU")
+        # logging.debug("Contract now has: " + str(self.currency.balance_of(account="con_reflecttau_v2_reflection")) + " TAU")
+        # logging.debug("Contract now has (metadata['tau_pool']): " + str(self.reflecttau_v2_reflection.metadata["tau_pool"]) + " TAU")
 
         #self.currency.approve(amount=4,to="con_rocketswap_official_v1_1",signer="hax")
         #self.reflecttau_v2.approve(amount=990090000,to="con_rocketswap_official_v1_1")

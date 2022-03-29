@@ -45,7 +45,7 @@ def sync_initial_liq_state():
 
 @export
 def execute(payload: dict, caller: str):
-    assert ctx.caller == rtau.contract(), 'You are not allowed to do that'
+    assert ctx.caller == rtau.contract(), 'You are not allowed to do that - rtau.contract() =' + " " + rtau.contract()
 
     if payload['function'] == 'transfer':
         return process_transfer(payload['amount'], payload['to'], caller)

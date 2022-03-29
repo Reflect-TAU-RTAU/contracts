@@ -13,7 +13,7 @@ def init():
     # TODO: Remove rswp import and only use metadata['dex']
     metadata['dex'] = 'con_rocketswap_official_v1_1'
 
-    contract.set(ctx.this)
+    contract.set("con_reflecttau_v2_liquidity")
 
     approve()
 

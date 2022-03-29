@@ -3,6 +3,8 @@ I = importlib
 import con_reflecttau_v2 as rtau
 import con_rocketswap_official_v1_1 as rswp
 
+contract = Variable()
+
 @construct
 def init():
 	contract.set(ctx.this)

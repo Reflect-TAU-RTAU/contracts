@@ -36,7 +36,7 @@ def init():
     total_supply.set(0.0)
     burn_address.set('reflecttau_burn_address')
     swap_end_date.set(now + datetime.timedelta(days=180))
-    contract.set(ctx.this)
+    contract.set("con_reflecttau_v2")
 
 @export
 def change_metadata(key: str, value: Any):
