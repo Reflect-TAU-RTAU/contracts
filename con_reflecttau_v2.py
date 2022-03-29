@@ -159,9 +159,18 @@ def transfer_from(amount: float, to: str, main_account: str):
     balances[main_account] -= amount
     balances[to] += execute('action_reflection', {'function': 'transfer_from', 'amount': amount, 'to': to, 'main_account': main_account})
 
+# TODO: What do we do with manual executions? Own function in here for each function call?
 def execute(action: str, payload: dict):
     assert metadata[action] is not None, 'Invalid action!'
     return I.import_module(metadata[action]).execute(payload, ctx.caller)
+
+@export
+def exec_distribute_dev_share_tau():
+    execute('action_dev', {'function': 'distribute_tau_share'})
+
+@export
+def exec_distribute_dev_share_rtau():
+    execute('action_dev', {'function': 'distribute_rtau_share'})
 
 @export
 def swap_basic(basic_amount: float):
@@ -177,6 +186,7 @@ def swap_basic(basic_amount: float):
     total_supply.set(total_supply.get() + swap_amount)
     balances[ctx.caller] += swap_amount
 
+    # TODO: Maybe not needed after we add address to holders index automatically
     execute('action_reflection', {'function': 'add_to_holders_index', 'address': ctx.caller})
 
 # TODO: What's the swap factor?
@@ -194,6 +204,7 @@ def swap_rtau(rtau_amount: float):
     total_supply.set(total_supply.get() + swap_amount)
     balances[ctx.caller] += swap_amount
 
+    # TODO: Maybe not needed after we add address to holders index automatically
     execute('action_reflection', {'function': 'add_to_holders_index', 'address': ctx.caller})
 
 @export
