@@ -8,7 +8,9 @@ contract = Variable()
 
 @construct
 def init():
+    # TODO: Make this a variable?
     metadata['is_initial_liq_ready'] = False
+    # TODO: Remove rswp import and only use metadata['dex']
     metadata['dex'] = 'con_rocketswap_official_v1_1'
 
     contract.set(ctx.this)
@@ -18,9 +20,13 @@ def init():
 @export
 def approve():
     # Approve sending unlimited amount of TAU to DEX contract
-    tau.approve(amount=999_999_999_999_999_999, to=rtau.metadata('dex'))
+    tau.approve(amount=999_999_999_999_999_999, to=metadata['dex'])
     # Approve sending unlimited amount of RTAU to DEX contract
-    rtau.approve(amount=999_999_999_999_999_999, to=rtau.metadata('dex'))
+    rtau.approve(amount=999_999_999_999_999_999, to=metadata['dex'])
+
+@export
+def metadata(key: str):
+    return metadata[key]
 
 @export
 def execute(payload: dict, caller: str):
@@ -84,6 +90,7 @@ def add_liquidity():
     
     else:
         tau_amount = rtau_balance * rtau_price
+        # TODO: Needed?
         rtau_amount = int(tau_amount / rtau_price) + 1
         
         result = rswp.add_liquidity(contract=rtau.contract(), currency_amount=tau_amount)
