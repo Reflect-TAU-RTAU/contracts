@@ -158,6 +158,23 @@ class MyTestCase(unittest.TestCase):
         self.reflecttau_v2_reflection.claim_tau()
         logging.debug("User has " + str(self.currency.balance_of(account=self.c.signer)) + " TAU after REDISTRIBUTE AND CLAIM")
 
+
+        logging.debug("\x1b[33;20m10. ADDING MORE LIQ TO PAIR\x1b[0m")
+        self.reflecttau_v2.approve(amount=1000,to="con_reflecttau_v2_liquidity")
+        self.currency.approve(amount=201,to="con_reflecttau_v2_liquidity")
+        logging.debug("Depositing more RTAU to Liq contract " + str(self.reflecttau_v2_liquidity.deposit_rtau(amount=1000)))
+        logging.debug("Depositing more TAU to Liq contract " + str(self.reflecttau_v2_liquidity.deposit_tau(amount=200)))
+        logging.debug("Added Liq " + str(self.reflecttau_v2_liquidity.add_liquidity()))
+
+        logging.debug("\x1b[33;20m11. TRANSFER RTAU AND GO UNDER REWARD LIMIT V2\x1b[0m")
+        logging.debug("User has " + str(self.reflecttau_v2.balance_of(address=self.c.signer)) + " RTAU")
+        logging.debug("Transfering all balance out")
+        self.reflecttau_v2.transfer(amount=8000, to="hax")
+        logging.debug("User has " + str(self.reflecttau_v2.balance_of(address=self.c.signer)) + " RTAU")
+        logging.debug("\x1b[33;20m FORWARD INDEX RTAU V2\x1b[0m")
+        logging.debug(self.reflecttau_v2_reflection.forward_holders_index.all())
+        logging.debug("\x1b[33;20m REVERSE INDEX RTAU V2\x1b[0m")
+        logging.debug(self.reflecttau_v2_reflection.reverse_holders_index.all())
         # logging.debug("\x1b[33;20m10. TEST SELL EVERYTHING RTAU (SHOULD REMOVE FROM HOLDERS) V2\x1b[0m")
         # self.reflecttau_v2.approve(amount=10000,to="con_rocketswap_official_v1_1")
         # logging.debug("Sold for: " + str(self.rocketswap.sell(contract="con_reflecttau_v2", token_amount=8001)) + " TAU")

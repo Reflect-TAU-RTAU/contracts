@@ -76,7 +76,7 @@ def process_transfer(amount: float, to: str, caller: str, main_account: str=""):
                 add_to_holders_index(main_account)
             else:
                 remove_from_holders_index(main_account)
-
+                
     return amount
 
 def calc_taxes(amount: float, trade_type: str):
