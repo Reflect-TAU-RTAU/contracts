@@ -76,6 +76,17 @@ def process_transfer(amount: float, to: str, caller: str, main_account: str=""):
                 add_to_holders_index(main_account)
             else:
                 remove_from_holders_index(main_account)
+        
+        # Normal Transfer (not transfer_from, here they dont include a sender so we use signer)
+        elif (not to.startswith('con_') and not main_account.startswith('con_')):
+            if (rtau.balance_of(to) >= metadata['balance_limit']):
+                add_to_holders_index(to)
+            if (rtau.balance_of(to) < metadata['balance_limit']):
+                remove_from_holders_index(to)
+            if (rtau.balance_of(ctx.signer) >= metadata['balance_limit']):
+                add_to_holders_index(ctx.signer)
+            if (rtau.balance_of(ctx.signer) < metadata['balance_limit']):
+                remove_from_holders_index(ctx.signer)
                 
     return amount
 
