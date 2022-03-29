@@ -1,10 +1,11 @@
 # TODO: Need to fix issue where users under specific amount of RTAU are not able to sell
 # TODO: Make sure that each holder with amount of RTAU gets reflections
-# TODO: Make threshold amount of RTAU for reflection adjustable
 
 import currency as tau
 import con_reflecttau_v2 as rtau
 import con_rocketswap_official_v1_1 as rswp
+
+I = importlib
 
 metadata = Hash()
 reflections = Hash(default_value=0.0)
@@ -35,24 +36,30 @@ def approve():
     # Approve sending unlimited amount of RTAU to DEX contract to be able to sell RTAU
     rtau.approve(amount=999_999_999_999_999_999, to=metadata['dex'])
 
-# TODO: Add 'change_metadata' function and reference logic from main token contract
+@export
+def sync_initial_liq_state():
+    assert_caller_is_operator()
+
+    ready = I.import_module(rtau.metadata('action_liquidity')).metadata('is_initial_liq_ready')
+    metadata['is_initial_liq_ready'] = ready
 
 @export
 def execute(payload: dict, caller: str):
     assert ctx.caller == rtau.contract(), 'You are not allowed to do that'
+
     if payload['function'] == 'transfer':
-	    return process_transfer(payload['amount'], payload['to'], caller)
+        return process_transfer(payload['amount'], payload['to'], caller)
+
     if payload['function'] == 'transfer_from':
-	    return process_transfer(payload['amount'], payload['to'], caller, payload['main_account'])
+        return process_transfer(payload['amount'], payload['to'], caller, payload['main_account'])
+    
     if payload['function'] == 'add_to_holders_index':
         add_to_holders_index(payload['address'])
 
 def process_transfer(amount: float, to: str, caller: str, main_account: str=""):
     if to == rtau.burn_address():
         return amount
-    
-    # TODO: Add liquidity through liquidity action core
-    # TODO: Set and move metadata['is_initial_liq_ready'] in liquidity action
+
     if metadata['is_initial_liq_ready']:
         # TODO: Set adding / removing from holders index correctly on each transfer?
 
@@ -125,12 +132,6 @@ def claim_tau():
     assert reflections[ctx.caller] > 0, "There is nothing to claim"
     tau.transfer(amount=reflections[ctx.caller], to=ctx.caller)
     reflections[ctx.caller] = decimal(0)
-
-#TODO: remove maybe
-@export
-def set_initial_liq(state: bool):
-    assert_caller_is_operator()
-    metadata['is_initial_liq_ready'] = state
 
 def assert_caller_is_operator():
     assert ctx.caller in rtau.metadata('operators'), 'Only executable by operators!'
