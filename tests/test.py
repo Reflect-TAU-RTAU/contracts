@@ -158,13 +158,6 @@ class MyTestCase(unittest.TestCase):
         self.reflecttau_v2_reflection.claim_tau()
         logging.debug("User has " + str(self.currency.balance_of(account=self.c.signer)) + " TAU after REDISTRIBUTE AND CLAIM")
 
-        logging.debug("\x1b[33;20m10. TEST SELL EVERYTHING RTAU (SHOULD REMOVE FROM HOLDERS) V2\x1b[0m")
-        self.reflecttau_v2.approve(amount=10000,to="con_rocketswap_official_v1_1")
-        logging.debug("Sold for: " + str(self.rocketswap.sell(contract="con_reflecttau_v2", token_amount=3000)) + " TAU")
-        logging.debug("User now has: " + str(self.reflecttau_v2.balance_of(address=self.c.signer)) + " RTAU V2 and " + str(self.currency.balance_of(account=self.c.signer)) + " TAU")
-        logging.debug("Contract now has: " + str(self.currency.balance_of(account="con_reflecttau_v2_reflection")) + " TAU")
-        logging.debug("Contract now has (metadata['tau_pool']): " + str(self.reflecttau_v2_reflection.metadata["tau_pool"]) + " TAU")
-
         # logging.debug("\x1b[33;20m10. TEST SELL EVERYTHING RTAU (SHOULD REMOVE FROM HOLDERS) V2\x1b[0m")
         # self.reflecttau_v2.approve(amount=10000,to="con_rocketswap_official_v1_1")
         # logging.debug("Sold for: " + str(self.rocketswap.sell(contract="con_reflecttau_v2", token_amount=8001)) + " TAU")

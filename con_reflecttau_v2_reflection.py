@@ -23,7 +23,7 @@ def init():
     metadata['is_initial_liq_ready'] = False
     metadata['tau_pool'] = decimal(0)
     metadata['dex'] = 'con_rocketswap_official_v1_1'
-    metadata['balance_limit'] = decimal(1_000_000)
+    metadata['balance_limit'] = decimal(1_000)
 
     holders_amount.set(0)
 
@@ -105,7 +105,7 @@ def add_to_holders_index(address: str):
 
 def remove_from_holders_index(address: str):
     if (reverse_holders_index[address] != False):
-        forward_holders_index[reverse_holders_index] = False
+        forward_holders_index[reverse_holders_index[address]] = False
         reverse_holders_index[address] = False
 
 @export
@@ -121,7 +121,7 @@ def redistribute_tau(start: int=0, end: int=0, reset_pool: bool=True):
 
     for holder_id in range(start, end):
         if (forward_holders_index[holder_id] != False):
-            holder_balance_share = rtau.balance_of([forward_holders_index[holder_id]]) / supply * 100
+            holder_balance_share = rtau.balance_of(address=forward_holders_index[holder_id]) / supply * 100
             reflections[forward_holders_index[holder_id]] += metadata["tau_pool"] / 100 * holder_balance_share
 
     if reset_pool:
