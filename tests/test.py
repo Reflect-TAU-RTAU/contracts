@@ -127,8 +127,8 @@ class MyTestCase(unittest.TestCase):
         
 
         logging.debug("\x1b[33;20m7. TEST BUY RTAU V2\x1b[0m")
-        self.currency.approve(amount=1,to="con_rocketswap_official_v1_1")
-        logging.debug("Purchased: " + str(self.rocketswap.buy(contract="con_reflecttau_v2", currency_amount=1)) + " RTAU V2")
+        self.currency.approve(amount=10000,to="con_rocketswap_official_v1_1")
+        logging.debug("Purchased: " + str(self.rocketswap.buy(contract="con_reflecttau_v2", currency_amount=10000)) + " RTAU V2")
         logging.debug("User now has: " + str(self.reflecttau_v2.balance_of(address=self.c.signer)) + " RTAU V2 and " + str(self.currency.balance_of(account=self.c.signer)) + " TAU")
         
         logging.debug("Buyback Contract now: " + str(self.currency.balance_of(account="con_reflecttau_v2_buyback")) + " TAU")
@@ -170,12 +170,6 @@ class MyTestCase(unittest.TestCase):
         logging.debug(self.reflecttau_v2_reflection.metadata['tau_pool'])
 
 
-        logging.debug("\x1b[33;20m10. ADDING MORE LIQ TO PAIR\x1b[0m")
-        self.reflecttau_v2.approve(amount=1000,to="con_reflecttau_v2_liquidity")
-        self.currency.approve(amount=201,to="con_reflecttau_v2_liquidity")
-        logging.debug("Depositing more RTAU to Liq contract " + str(self.reflecttau_v2_liquidity.deposit_rtau(amount=1000)))
-        logging.debug("Depositing more TAU to Liq contract " + str(self.reflecttau_v2_liquidity.deposit_tau(amount=200)))
-        logging.debug("Added Liq " + str(self.reflecttau_v2_liquidity.add_liquidity()))
 
         logging.debug("\x1b[33;20m11. TRANSFER RTAU AND GO UNDER REWARD LIMIT V2\x1b[0m")
         logging.debug("User has " + str(self.reflecttau_v2.balance_of(address=self.c.signer)) + " RTAU")
@@ -186,10 +180,8 @@ class MyTestCase(unittest.TestCase):
         logging.debug(self.reflecttau_v2_reflection.forward_holders_index.all())
         logging.debug("\x1b[33;20m REVERSE INDEX RTAU V2\x1b[0m")
         logging.debug(self.reflecttau_v2_reflection.reverse_holders_index.all())
-        logging.debug("\x1b[33;20m12. REDISTRIBUTE RTAU V2\x1b[0m")
-        self.reflecttau_v2_reflection.redistribute_tau()
-        logging.debug("\x1b[33;20m REFLECTION HASH RTAU V2\x1b[0m")
-        logging.debug(self.reflecttau_v2_reflection.reflections.all())
+        logging.debug("\x1b[33;20m12. AUTO LIQ RTAU V2\x1b[0m")
+        logging.debug(self.reflecttau_v2_liquidity.add_liquidity())
 
 
 

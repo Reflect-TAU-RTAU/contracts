@@ -78,7 +78,7 @@ def process_transfer(amount: float, to: str, caller: str, main_account: str=""):
         # TODO: Set adding / removing from holders index correctly on each transfer?
 
         # DEX Buy
-        if (caller == metadata['dex'] and to != ctx.this and main_account == ""):
+        if (caller == metadata['dex'] and to != ctx.this and to != rtau.metadata('action_liquidity') and main_account == ""):
             amount -= process_taxes(calc_taxes(amount, "buy"))
             add_to_holders_index(to)
 
@@ -114,7 +114,7 @@ def process_taxes(taxes: float):
     # TODO: Are we able to send it with 'rtau.transfer()' instead?
     rtau.add_balance_to_reflect_action(amount=taxes)
 
-    rswp = I.import_module(metadata['dex'])
+    rswp = I.import_module(metadata['dex']) 
     tau_amount = rswp.sell(contract=rtau.contract(), token_amount=taxes)
     tau.transfer(amount=(tau_amount / 100 * metadata['dev_perc_of_tax']), to=rtau.metadata('action_dev'))
     tau.transfer(amount=(tau_amount / 100 * metadata['buyback_perc_of_tax']), to=rtau.metadata('action_buyback'))

@@ -78,24 +78,25 @@ def create_market(tau_amount: float, token_amount: float):
 @export
 def add_liquidity():
     rtau.assert_signer_is_operator()
+    
+    rswp = I.import_module(metadata['dex'])
+    rswp.buy(contract=rtau.contract(), currency_amount=tau.balance_of(contract.get())/2)
 
     rswp_prices = ForeignHash(foreign_contract=metadata['dex'], foreign_name='prices')
     
     rtau_price = rswp_prices[rtau.contract()]
     
-    tau_balance = int(tau.balance_of(contract.get()))
-    rtau_balance = int(rtau.balance_of(contract.get()))
-    rtau_amount = int(tau_balance / rtau_price) + 1
+    tau_balance = tau.balance_of(contract.get())
+    rtau_balance = rtau.balance_of(contract.get())
+    rtau_amount = tau_balance / rtau_price
 
-    rswp = I.import_module(metadata['dex'])
+    
 
     if rtau_balance > rtau_amount:
         result = rswp.add_liquidity(contract=rtau.contract(), currency_amount=tau_balance)
     
     else:
         tau_amount = rtau_balance * rtau_price
-        # TODO: Needed?
-        rtau_amount = int(tau_amount / rtau_price) + 1
         
         result = rswp.add_liquidity(contract=rtau.contract(), currency_amount=tau_amount)
 
