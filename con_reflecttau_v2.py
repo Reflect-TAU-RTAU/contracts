@@ -26,11 +26,10 @@ def init():
     metadata['token_name'] = "ReflectTAU.io"
     metadata['token_symbol'] = "RTAU"
 
-    # TODO: Set real addresses
     metadata['operators'] = [
-        'ae7d14d6d9b8443f881ba6244727b69b681010e782d4fe482dbfb0b6aca02d5d',
-        'ff61544ea94eaaeb5df08ed863c4a938e9129aba6ceee5f31b6681bdede11b89',
-        'TODO'
+        'a5565739151e6f8d3fbb03ab605a31cc285e36a717a95002a60e6e4d4e4fa411',
+        '025169da812b5db222e0ce57fbc2b5f949a59ac10a1a65a77fa4ab67c492fbad',
+        '6351a80d32cbb3c173e490b093a95b15bcf4f6190251863669202d7fe2257af3'
     ]
 
     total_supply.set(0.0)
