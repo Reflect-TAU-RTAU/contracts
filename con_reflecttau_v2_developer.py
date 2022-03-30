@@ -17,7 +17,7 @@ def distribute_tau_share():
 	individual_amount = int(total_amount / shareholders)
 
 	for op in rtau.metadata['operators']:
-		tau.transfer(amount, ctx.signer)
+		tau.transfer(amount, op)
 
 	return f'{individual_amount}'
 
@@ -27,6 +27,6 @@ def distribute_rtau_share():
 	individual_amount = int(total_amount / shareholders)
 
 	for op in rtau.metadata['operators']:
-		rtau.transfer(amount, ctx.signer)
+		rtau.transfer(amount, op)
 
 	return f'{individual_amount}'
