@@ -175,20 +175,12 @@ class MyTestCase(unittest.TestCase):
         logging.debug(self.reflecttau_v2_reflection.forward_holders_index.all())
         logging.debug("\x1b[33;20m REVERSE INDEX RTAU V2\x1b[0m")
         logging.debug(self.reflecttau_v2_reflection.reverse_holders_index.all())
-        # logging.debug("\x1b[33;20m10. TEST SELL EVERYTHING RTAU (SHOULD REMOVE FROM HOLDERS) V2\x1b[0m")
-        # self.reflecttau_v2.approve(amount=10000,to="con_rocketswap_official_v1_1")
-        # logging.debug("Sold for: " + str(self.rocketswap.sell(contract="con_reflecttau_v2", token_amount=8001)) + " TAU")
-        # logging.debug("User now has: " + str(self.reflecttau_v2.balance_of(address=self.c.signer)) + " RTAU V2 and " + str(self.currency.balance_of(account=self.c.signer)) + " TAU")
-        # logging.debug("Contract now has: " + str(self.currency.balance_of(account="con_reflecttau_v2_reflection")) + " TAU")
-        # logging.debug("Contract now has (metadata['tau_pool']): " + str(self.reflecttau_v2_reflection.metadata["tau_pool"]) + " TAU")
+        logging.debug("\x1b[33;20m12. REDISTRIBUTE RTAU V2\x1b[0m")
+        self.reflecttau_v2_reflection.redistribute_tau()
+        logging.debug("\x1b[33;20m REFLECTION HASH RTAU V2\x1b[0m")
+        logging.debug(self.reflecttau_v2_reflection.reflections.all())
 
-        #self.currency.approve(amount=4,to="con_rocketswap_official_v1_1",signer="hax")
-        #self.reflecttau_v2.approve(amount=990090000,to="con_rocketswap_official_v1_1")
-        #self.currency.approve(amount=11111111,to="con_rocketswap_official_v1_1")
 
-        #self.rswp_token.approve(amount=1,to="con_rocketswap_official_v1_1")
-        #logging.debug("Useless RSWP Pair created o: " + str(self.rocketswap.create_market(contract="con_rswp_lst001",currency_amount=1,token_amount=1)))
-        #logging.debug("Pair created: " + str(self.rocketswap.create_market(contract="con_reflecttau_v2",currency_amount=65000,token_amount=680000000)))
 
        
 

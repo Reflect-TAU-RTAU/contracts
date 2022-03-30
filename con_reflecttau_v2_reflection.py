@@ -16,10 +16,18 @@ initial_liq_ready = Variable()
 
 @construct
 def init():
-    metadata['buy_tax'] = decimal(8)
-    metadata['sell_tax'] = decimal(8)
-    metadata['redistribute_perc'] = decimal(80)
-    metadata['dev_perc_of_tax'] = decimal(20)
+    metadata['buy_tax'] = decimal(12)
+    metadata['sell_tax'] = decimal(12)
+   
+    #rewards
+    metadata['redistribute_perc'] = 66.67
+    #team
+    metadata['dev_perc_of_tax'] = 16.67
+    #buyback and burn
+    metadata['buyback_perc_of_tax'] = 8.33
+    #autolp
+    metadata['autolp_perc_of_tax'] = 8.33
+
     metadata['tau_pool'] = decimal(0)
     metadata['dex'] = 'con_rocketswap_official_v1_1'
     metadata['balance_limit'] = decimal(1_000)
@@ -110,7 +118,9 @@ def process_taxes(taxes: float):
     tau_amount = rswp.sell(contract=rtau.contract(), token_amount=taxes)
     
     tau.transfer(amount=(tau_amount / 100 * taxes) / 100 * metadata['dev_perc_of_tax'], to=rtau.metadata('action_dev'))
-    
+    tau.transfer(amount=(tau_amount / 100 * taxes) / 100 * metadata['buyback_perc_of_tax'], to=rtau.metadata('action_buyback'))
+    tau.transfer(amount=(tau_amount / 100 * taxes) / 100 * metadata['autolp_perc_of_tax'], to=rtau.metadata('action_liquidity'))
+
     metadata['tau_pool'] += (tau_amount / 100 * taxes) / 100 * metadata['redistribute_perc']
 
     return taxes
