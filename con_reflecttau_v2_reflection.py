@@ -116,12 +116,11 @@ def process_taxes(taxes: float):
 
     rswp = I.import_module(metadata['dex'])
     tau_amount = rswp.sell(contract=rtau.contract(), token_amount=taxes)
-    
-    tau.transfer(amount=(tau_amount / 100 * taxes) / 100 * metadata['dev_perc_of_tax'], to=rtau.metadata('action_dev'))
-    tau.transfer(amount=(tau_amount / 100 * taxes) / 100 * metadata['buyback_perc_of_tax'], to=rtau.metadata('action_buyback'))
-    tau.transfer(amount=(tau_amount / 100 * taxes) / 100 * metadata['autolp_perc_of_tax'], to=rtau.metadata('action_liquidity'))
+    tau.transfer(amount=(tau_amount / 100 * metadata['dev_perc_of_tax']), to=rtau.metadata('action_dev'))
+    tau.transfer(amount=(tau_amount / 100 * metadata['buyback_perc_of_tax']), to=rtau.metadata('action_buyback'))
+    tau.transfer(amount=(tau_amount / 100 * metadata['autolp_perc_of_tax']), to=rtau.metadata('action_liquidity'))
 
-    metadata['tau_pool'] += (tau_amount / 100 * taxes) / 100 * metadata['redistribute_perc']
+    metadata['tau_pool'] += (tau_amount / 100 * metadata['redistribute_perc'])
 
     return taxes
 
@@ -144,6 +143,9 @@ def redistribute_tau(start: int=0, end: int=0, reset_pool: bool=True):
     if start == None and end == None:
         start = 1
         end = holders_amount.get() + 1
+    
+    if reset_pool == None:
+        reset_pool = True
 
     supply = rtau.circulating_supply() - rtau.balance_of(metadata['dex'])
 
@@ -152,6 +154,7 @@ def redistribute_tau(start: int=0, end: int=0, reset_pool: bool=True):
             holder_balance_share = rtau.balance_of(address=forward_holders_index[holder_id]) / supply * 100
             reflections[forward_holders_index[holder_id]] += metadata["tau_pool"] / 100 * holder_balance_share
 
+    # this is not True by default
     if reset_pool:
         metadata['tau_pool'] = decimal(0)
 

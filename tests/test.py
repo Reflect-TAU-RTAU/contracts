@@ -130,15 +130,23 @@ class MyTestCase(unittest.TestCase):
         self.currency.approve(amount=1,to="con_rocketswap_official_v1_1")
         logging.debug("Purchased: " + str(self.rocketswap.buy(contract="con_reflecttau_v2", currency_amount=1)) + " RTAU V2")
         logging.debug("User now has: " + str(self.reflecttau_v2.balance_of(address=self.c.signer)) + " RTAU V2 and " + str(self.currency.balance_of(account=self.c.signer)) + " TAU")
-        logging.debug("Contract now has: " + str(self.currency.balance_of(account="con_reflecttau_v2_reflection")) + " TAU")
-        logging.debug("Contract now has (metadata['tau_pool']): " + str(self.reflecttau_v2_reflection.metadata["tau_pool"]) + " TAU")
+        
+        logging.debug("Buyback Contract now: " + str(self.currency.balance_of(account="con_reflecttau_v2_buyback")) + " TAU")
+        logging.debug("Liquidity Contract now: " + str(self.currency.balance_of(account="con_reflecttau_v2_liquidity")) + " TAU")
+        logging.debug("Develop Contract now: " + str(self.currency.balance_of(account="con_reflecttau_v2_developer")) + " TAU")
+        logging.debug("Reflection Contract now has: " + str(self.currency.balance_of(account="con_reflecttau_v2_reflection")) + " TAU")
+        logging.debug("Reflection Contract now has (metadata['tau_pool']): " + str(self.reflecttau_v2_reflection.metadata["tau_pool"]) + " TAU")
 
         logging.debug("\x1b[33;20m8. TEST SELL RTAU V2\x1b[0m")
         self.reflecttau_v2.approve(amount=1,to="con_rocketswap_official_v1_1")
         logging.debug("Sold for: " + str(self.rocketswap.sell(contract="con_reflecttau_v2", token_amount=1)) + " TAU")
         logging.debug("User now has: " + str(self.reflecttau_v2.balance_of(address=self.c.signer)) + " RTAU V2 and " + str(self.currency.balance_of(account=self.c.signer)) + " TAU")
-        logging.debug("Contract now has: " + str(self.currency.balance_of(account="con_reflecttau_v2_reflection")) + " TAU")
-        logging.debug("Contract now has (metadata['tau_pool']): " + str(self.reflecttau_v2_reflection.metadata["tau_pool"]) + " TAU")
+        
+        logging.debug("Buyback Contract now: " + str(self.currency.balance_of(account="con_reflecttau_v2_buyback")) + " TAU")
+        logging.debug("Liquidity Contract now: " + str(self.currency.balance_of(account="con_reflecttau_v2_liquidity")) + " TAU")
+        logging.debug("Develop Contract now: " + str(self.currency.balance_of(account="con_reflecttau_v2_developer")) + " TAU")
+        logging.debug("Reflection Contract now has: " + str(self.currency.balance_of(account="con_reflecttau_v2_reflection")) + " TAU")
+        logging.debug("Reflection Contract now has (metadata['tau_pool']): " + str(self.reflecttau_v2_reflection.metadata["tau_pool"]) + " TAU")
 
         logging.debug("\x1b[33;20mINFO RTAU V2\x1b[0m")
         logging.debug("\x1b[33;20m FORWARD INDEX RTAU V2\x1b[0m")
@@ -153,10 +161,13 @@ class MyTestCase(unittest.TestCase):
         logging.debug("\x1b[33;20m9. REDISTRIBUTE RTAU V2\x1b[0m")
         logging.debug("User has " + str(self.currency.balance_of(account=self.c.signer)) + " TAU before REDISTRIBUTE")
         self.reflecttau_v2_reflection.redistribute_tau()
+        
         logging.debug("\x1b[33;20m REFLECTION HASH RTAU V2\x1b[0m")
         logging.debug(self.reflecttau_v2_reflection.reflections.all())
         self.reflecttau_v2_reflection.claim_tau()
         logging.debug("User has " + str(self.currency.balance_of(account=self.c.signer)) + " TAU after REDISTRIBUTE AND CLAIM")
+        logging.debug("\x1b[33;20m TAU POOL RTAU V2\x1b[0m")
+        logging.debug(self.reflecttau_v2_reflection.metadata['tau_pool'])
 
 
         logging.debug("\x1b[33;20m10. ADDING MORE LIQ TO PAIR\x1b[0m")
