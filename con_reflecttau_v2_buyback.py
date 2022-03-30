@@ -1,17 +1,13 @@
 import currency as tau
 import con_reflecttau_v2 as rtau
-import con_rocketswap_official_v1_1 as rswp
+
+I = importlib
 
 metadata = Hash()
-
-contract = Variable()
 
 @construct
 def init():
 	metadata['dex'] = 'con_rocketswap_official_v1_1'
-
-	contract.set(ctx.this)
-
 	approve()
 
 @export
@@ -20,8 +16,9 @@ def approve():
     tau.approve(amount=999_999_999_999_999_999, to=metadata['dex'])
 
 @export
-def metadata(key: str):
-    return metadata[key]
+def change_metadata(key: str, value: Any):
+	rtau.assert_signer_is_operator()
+	metadata[key] = value
 
 @export
 def execute(payload: dict, caller: str):
@@ -29,6 +26,7 @@ def execute(payload: dict, caller: str):
 	return buyback_and_burn()
 
 def buyback_and_burn():
-	rtau_amount = rswp.buy(contract=rtau.contract(), currency_amount=tau.balance_of(contract.get()))
+	rswp = I.import_module(metadata['dex'])
+	rtau_amount = rswp.buy(contract=rtau.contract(), currency_amount=tau.balance_of(ctx.this))
 	rtau.transfer(rtau_amount, rtau.burn_address())
 	return rtau_amount
