@@ -68,10 +68,7 @@ def execute(payload: dict, caller: str):
         add_to_holders_index(payload['address'])
 
 def process_transfer(amount: float, to: str, caller: str, main_account: str=""):
-    if to == rtau.metadata('action_liquidity') or to == rtau.metadata('action_buyback'):
-        return amount
-
-    if to == rtau.burn_address():
+    if to in (rtau.metadata('action_liquidity'), rtau.metadata('action_buyback'), rtau.burn_address()):
         return amount
 
     if initial_liq_ready.get():
