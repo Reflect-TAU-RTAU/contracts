@@ -38,7 +38,7 @@ def approve():
 
 @export
 def sync_initial_liq_state():
-    assert_caller_is_operator()
+    rtau.assert_signer_is_operator()
 
     ready = I.import_module(rtau.metadata('action_liquidity')).metadata('is_initial_liq_ready')
     metadata['is_initial_liq_ready'] = ready
@@ -121,7 +121,7 @@ def remove_from_holders_index(address: str):
 
 @export
 def redistribute_tau(start: int=0, end: int=0, reset_pool: bool=True):
-    assert_caller_is_operator()
+    rtau.assert_signer_is_operator()
 
     # TODO: wtf this is None and not default 0
     if start == None and end == None:
@@ -143,6 +143,3 @@ def claim_tau():
     assert reflections[ctx.caller] > 0, "There is nothing to claim"
     tau.transfer(amount=reflections[ctx.caller], to=ctx.caller)
     reflections[ctx.caller] = decimal(0)
-
-def assert_caller_is_operator():
-    assert ctx.caller in rtau.metadata('operators'), 'Only executable by operators!'
