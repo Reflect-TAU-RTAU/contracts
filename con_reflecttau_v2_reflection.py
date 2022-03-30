@@ -16,19 +16,18 @@ initial_liq_ready = Variable()
 def init():
     metadata['buy_tax'] = decimal(12)
     metadata['sell_tax'] = decimal(12)
-   
-    #rewards
-    metadata['redistribute_perc'] = 66.67
-    #team
-    metadata['dev_perc_of_tax'] = 16.67
-    #buyback and burn
-    metadata['buyback_perc_of_tax'] = 8.33
-    #autolp
-    metadata['autolp_perc_of_tax'] = 8.33
-
     metadata['tau_pool'] = decimal(0)
-    metadata['dex'] = 'con_rocketswap_official_v1_1'
     metadata['balance_limit'] = decimal(1_000)
+    metadata['dex'] = 'con_rocketswap_official_v1_1'
+
+    # Rewards
+    metadata['redistribute_perc'] = 66.67
+    # Team
+    metadata['dev_perc_of_tax'] = 16.67
+    # Buyback and Burn
+    metadata['buyback_perc_of_tax'] = 8.33
+    # Auto-LP
+    metadata['autolp_perc_of_tax'] = 8.33
 
     holders_amount.set(0)
     initial_liq_ready.set(False)
@@ -69,14 +68,16 @@ def execute(payload: dict, caller: str):
         add_to_holders_index(payload['address'])
 
 def process_transfer(amount: float, to: str, caller: str, main_account: str=""):
+    if to == rtau.metadata('action_liquidity') or to == rtau.metadata('action_buyback'):
+        return amount
+
     if to == rtau.burn_address():
         return amount
 
     if initial_liq_ready.get():
-        
 
         # DEX Buy
-        if (caller == metadata['dex'] and to != ctx.this and to != rtau.metadata('action_liquidity') and to != rtau.metadata('action_buyback') and main_account == ""):
+        if (caller == metadata['dex'] and to != ctx.this and main_account == ""):
             amount -= process_taxes(calc_taxes(amount, "buy"))
             add_to_holders_index(to)
 
@@ -114,6 +115,7 @@ def process_taxes(taxes: float):
 
     rswp = I.import_module(metadata['dex']) 
     tau_amount = rswp.sell(contract=rtau.contract(), token_amount=taxes)
+    
     tau.transfer(amount=(tau_amount / 100 * metadata['dev_perc_of_tax']), to=rtau.metadata('action_dev'))
     tau.transfer(amount=(tau_amount / 100 * metadata['buyback_perc_of_tax']), to=rtau.metadata('action_buyback'))
     tau.transfer(amount=(tau_amount / 100 * metadata['autolp_perc_of_tax']), to=rtau.metadata('action_liquidity'))
@@ -152,7 +154,7 @@ def redistribute_tau(start: int=0, end: int=0, reset_pool: bool=True):
             holder_balance_share = rtau.balance_of(address=forward_holders_index[holder_id]) / supply * 100
             reflections[forward_holders_index[holder_id]] += metadata["tau_pool"] / 100 * holder_balance_share
 
-    # this is not True by default
+    # TODO: this is not True by default
     if reset_pool:
         metadata['tau_pool'] = decimal(0)
 
