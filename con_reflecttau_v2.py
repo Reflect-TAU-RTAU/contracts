@@ -156,6 +156,10 @@ def execute(action: str, payload: dict):
     return I.import_module(metadata[action]).execute(payload, ctx.caller)
 
 @export
+def external_execute(action: str, payload: dict):
+    return execute(action, payload)
+
+@export
 def swap_basic(basic_amount: float):
     assert now < swap_end_date.get(), 'Swap period ended'
     assert basic_amount > 0, 'Cannot swap negative balances!'
@@ -169,10 +173,8 @@ def swap_basic(basic_amount: float):
     total_supply.set(total_supply.get() + swap_amount)
     balances[ctx.caller] += swap_amount
 
-    # TODO: Maybe not needed after we add address to holders index automatically
     execute('action_reflection', {'function': 'add_to_holders_index', 'address': ctx.caller})
 
-# TODO: What's the swap factor?
 @export
 def swap_rtau(rtau_amount: float):
     assert now < swap_end_date.get(), 'Swap period ended'
@@ -183,11 +185,11 @@ def swap_rtau(rtau_amount: float):
         amount=rtau_amount, 
         to=burn_address.get())
 
+    # TODO: Set correct swap factor
     swap_amount = rtau_amount / 10000
     total_supply.set(total_supply.get() + swap_amount)
     balances[ctx.caller] += swap_amount
 
-    # TODO: Maybe not needed after we add address to holders index automatically
     execute('action_reflection', {'function': 'add_to_holders_index', 'address': ctx.caller})
 
 @export
