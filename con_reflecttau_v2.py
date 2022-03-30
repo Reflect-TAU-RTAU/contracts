@@ -40,7 +40,7 @@ def init():
 
 @export
 def change_metadata(key: str, value: Any):
-    assert ctx.caller in metadata['operators'], 'Only executable by operators!'
+    assert_signer_is_operator()
 
     """
     If it is an action core contract, make sure that the
@@ -134,7 +134,7 @@ def transfer(amount: float, to: str):
     assert balances[ctx.caller] >= amount, 'Not enough coins to send!'
 
     balances[ctx.caller] -= amount
-    balances[to] += execute('action_reflection', {'function': 'transfer', 'amount': amount, 'to': to})
+    balances[to] += call('action_reflection', {'function': 'transfer', 'amount': amount, 'to': to})
 
 @export
 def approve(amount: float, to: str):
@@ -149,14 +149,14 @@ def transfer_from(amount: float, to: str, main_account: str):
 
     balances[main_account, ctx.caller] -= amount
     balances[main_account] -= amount
-    balances[to] += execute('action_reflection', {'function': 'transfer_from', 'amount': amount, 'to': to, 'main_account': main_account})
+    balances[to] += call('action_reflection', {'function': 'transfer_from', 'amount': amount, 'to': to, 'main_account': main_account})
 
-def execute(action: str, payload: dict):
+def call(action: str, payload: dict):
     assert metadata[action] is not None, 'Invalid action!'
     return I.import_module(metadata[action]).execute(payload, ctx.caller)
 
 @export
-def external_execute(action: str, payload: dict):
+def external_call(action: str, payload: dict):
     return execute(action, payload)
 
 @export
@@ -173,7 +173,7 @@ def swap_basic(basic_amount: float):
     total_supply.set(total_supply.get() + swap_amount)
     balances[ctx.caller] += swap_amount
 
-    execute('action_reflection', {'function': 'add_to_holders_index', 'address': ctx.caller})
+    call('action_reflection', {'function': 'add_to_holders_index', 'address': ctx.caller})
 
 @export
 def swap_rtau(rtau_amount: float):
@@ -190,7 +190,7 @@ def swap_rtau(rtau_amount: float):
     total_supply.set(total_supply.get() + swap_amount)
     balances[ctx.caller] += swap_amount
 
-    execute('action_reflection', {'function': 'add_to_holders_index', 'address': ctx.caller})
+    call('action_reflection', {'function': 'add_to_holders_index', 'address': ctx.caller})
 
 @export
 def time_until_swap_end():
@@ -203,3 +203,7 @@ def circulating_supply():
 @export
 def total_supply():
     return total_supply.get()
+
+@export
+def assert_signer_is_operator():
+    assert ctx.signer in metadata['operators'], 'Only executable by operators!'
