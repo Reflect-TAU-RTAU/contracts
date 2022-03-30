@@ -79,7 +79,7 @@ def add_liquidity():
     rtau.assert_signer_is_operator()
     
     rswp = I.import_module(metadata['dex'])
-    rswp.buy(contract=rtau.contract(), currency_amount=tau.balance_of(contract.get())/2)
+    rswp.buy(contract=rtau.contract(), currency_amount=tau.balance_of(contract.get()) / 2)
 
     rswp_prices = ForeignHash(foreign_contract=metadata['dex'], foreign_name='prices')
     
@@ -89,14 +89,11 @@ def add_liquidity():
     rtau_balance = rtau.balance_of(contract.get())
     rtau_amount = tau_balance / rtau_price
 
-    
-
     if rtau_balance > rtau_amount:
         result = rswp.add_liquidity(contract=rtau.contract(), currency_amount=tau_balance)
     
     else:
         tau_amount = rtau_balance * rtau_price
-        
         result = rswp.add_liquidity(contract=rtau.contract(), currency_amount=tau_amount)
 
     return result
