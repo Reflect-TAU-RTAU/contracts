@@ -100,7 +100,7 @@ def assert_operators_agree(agreement: str, one_time: bool=True):
     assert metadata[agreement] == 'agreed', 'No agreement met!'
 
     if one_time:
-        metadata[key] = ''
+        metadata[agreement] = ''
 
 @export
 def balance_of(address: str):
