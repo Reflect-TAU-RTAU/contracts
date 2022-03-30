@@ -181,8 +181,9 @@ class MyTestCase(unittest.TestCase):
         logging.debug("\x1b[33;20m REVERSE INDEX RTAU V2\x1b[0m")
         logging.debug(self.reflecttau_v2_reflection.reverse_holders_index.all())
         logging.debug("\x1b[33;20m12. AUTO LIQ RTAU V2\x1b[0m")
-        logging.debug(self.reflecttau_v2_liquidity.add_liquidity())
-
+        logging.debug("Added: " + str(self.reflecttau_v2_liquidity.add_liquidity()))
+        logging.debug("\x1b[33;20m13. BUYBACK RTAU V2\x1b[0m")
+        logging.debug("Bought back and burned: " + str(self.reflecttau_v2.external_call(action="action_buyback",payload="")))    
 
 
        

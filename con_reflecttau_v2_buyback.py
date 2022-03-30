@@ -14,6 +14,7 @@ def init():
 def approve():
     # Approve sending unlimited amount of TAU to DEX contract to be able to buy RTAU
     tau.approve(amount=999_999_999_999_999_999, to=metadata['dex'])
+    rtau.approve(amount=999_999_999_999_999_999, to=rtau.burn_address())
 
 @export
 def change_metadata(key: str, value: Any):
@@ -27,6 +28,7 @@ def execute(payload: dict, caller: str):
 
 def buyback_and_burn():
     rswp = I.import_module(metadata['dex'])
+    
     rtau_amount = rswp.buy(contract=rtau.contract(), currency_amount=tau.balance_of(ctx.this))
-    rtau.transfer(rtau_amount, rtau.burn_address())
+    rtau.transfer(amount=rtau.balance_of(ctx.this), to=rtau.burn_address())
     return rtau_amount
