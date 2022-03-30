@@ -1,5 +1,3 @@
-# TODO: Need to fix issue where users under specific amount of RTAU are not able to sell
-# TODO: Make sure that each holder with amount of RTAU gets reflections
 
 import currency as tau
 import con_reflecttau_v2 as rtau
@@ -75,7 +73,7 @@ def process_transfer(amount: float, to: str, caller: str, main_account: str=""):
         return amount
 
     if initial_liq_ready.get():
-        # TODO: Set adding / removing from holders index correctly on each transfer?
+        
 
         # DEX Buy
         if (caller == metadata['dex'] and to != ctx.this and to != rtau.metadata('action_liquidity') and to != rtau.metadata('action_buyback') and main_account == ""):
