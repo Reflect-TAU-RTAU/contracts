@@ -5,15 +5,14 @@ import con_rocketswap_official_v1_1 as rswp
 metadata = Hash()
 
 contract = Variable()
+initial_liq_ready = Variable()
 
 @construct
 def init():
-    # TODO: Make this a variable?
-    metadata['is_initial_liq_ready'] = False
-    # TODO: Remove rswp import and only use metadata['dex']
     metadata['dex'] = 'con_rocketswap_official_v1_1'
-
-    contract.set("con_reflecttau_v2_liquidity")
+    # TODO: Do we need to do this or is it OK to use ctx.this ?
+    contract.set(rtau.metadata('action_liquidity'))
+    initial_liq_ready.set(False)
 
     approve()
 
@@ -25,8 +24,9 @@ def approve():
     rtau.approve(amount=999_999_999_999_999_999, to=metadata['dex'])
 
 @export
-def metadata(key: str):
-    return metadata[key]
+def change_metadata(key: str, value: Any):
+    rtau.assert_signer_is_operator()
+    metadata[key] = value
 
 @export
 def execute(payload: dict, caller: str):
@@ -68,14 +68,14 @@ def withdraw_rtau(amount: float, to: str):
 
 @export
 def create_market(tau_amount: float, token_amount: float):
-    assert_caller_is_operator()
+    rtau.assert_signer_is_operator()
 
-    metadata['is_initial_liq_ready'] = True
+    initial_liq_ready.set(True)
     rswp.create_market(contract=rtau.contract(), currency_amount=tau_amount, token_amount=token_amount)
 
 @export
 def add_liquidity():
-    assert_caller_is_operator()
+    rtau.assert_signer_is_operator()
 
     rswp_prices = ForeignHash(foreign_contract=metadata['dex'], foreign_name='prices')
     
@@ -102,6 +102,3 @@ def remove_liquidity(amount: float):
 
 def transfer_liquidity(amount: float, to: str):
     return rswp.transfer_liquidity(contract=rtau.contract(), to=to, amount=amount)
-
-def assert_caller_is_operator():
-    assert ctx.caller in rtau.metadata('operators'), 'Only executable by operators!'
