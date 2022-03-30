@@ -1,19 +1,23 @@
+import con_reflecttau_v2 as rtau
+
 I = importlib
 
-import con_reflecttau_v2 as rtau
-import con_rocketswap_official_v1_1 as rswp
-
-contract = Variable()
+metadata = Hash()
 
 @construct
 def init():
-	contract.set(ctx.this)
+	metadata['dex'] = 'con_rocketswap_official_v1_1'
+
+@export
+def change_metadata(key: str, value: Any):
+    rtau.assert_signer_is_operator()
+    metadata[key] = value
 
 @export
 def execute(payload: dict, caller: str):
 	assert ctx.caller == rtau.contract(), 'You are not allowed to do that'
 
-	key = f"{contract.get()}:{payload['function']}:{payload['amount']}:{payload['to']}"
+	key = f"{ctx.this}:{payload['function']}:{payload['amount']}:{payload['to']}"
 	rtau.assert_operators_agree(agreement=key)
 
 	if payload['function'] == 'withdraw_token':
@@ -24,14 +28,18 @@ def execute(payload: dict, caller: str):
 
 @export
 def deposit_token(token_contract: str, amount: float):
-	return I.import_module(token_contract).transfer_from(amount=amount, to=contract.get(), main_account=ctx.caller)
+	token = I.import_module(token_contract)
+	return token.transfer_from(amount=amount, to=ctx.this, main_account=ctx.caller)
 
 @export
 def deposit_lp(token_contract: str, amount: float):
-	return rswp.transfer_liquidity_from(contract=token_contract, to=contract.get(), main_account=ctx.caller, amount=amount)
+	rswp = I.import_module(metadata['dex'])
+	return rswp.transfer_liquidity_from(contract=token_contract, to=ctx.this, main_account=ctx.caller, amount=amount)
 
 def withdraw_token(token_contract: str, amount: float, to: str):
-	return I.import_module(token_contract).transfer(amount=amount, to=to)
+	token = I.import_module(token_contract)
+	return token.transfer(amount=amount, to=to)
 
 def withdraw_lp(token_contract: str, amount: float, to: str):
+	rswp = I.import_module(metadata['dex'])
 	return rswp.transfer_liquidity(contract=token_contract, amount=amount, to=to)
