@@ -128,14 +128,6 @@ def add_balance_to_reflect_action(amount: float):
     assert ctx.caller == metadata['action_reflection'], 'You are not allowed to do that'
     balances[metadata['action_reflection']] += amount
 
-# TODO: Still needed?
-def transfer_internal(amount: float, to: str):
-    assert amount > 0, 'Cannot send negative balances!'
-    assert balances[ctx.this] >= amount, 'Not enough coins to send!'
-
-    balances[ctx.this] -= amount
-    balances[to] += amount
-
 @export
 def transfer(amount: float, to: str):
     assert amount > 0, 'Cannot send negative balances!'
@@ -159,18 +151,9 @@ def transfer_from(amount: float, to: str, main_account: str):
     balances[main_account] -= amount
     balances[to] += execute('action_reflection', {'function': 'transfer_from', 'amount': amount, 'to': to, 'main_account': main_account})
 
-# TODO: What do we do with manual executions? Own function in here for each function call?
 def execute(action: str, payload: dict):
     assert metadata[action] is not None, 'Invalid action!'
     return I.import_module(metadata[action]).execute(payload, ctx.caller)
-
-@export
-def exec_distribute_dev_share_tau():
-    execute('action_dev', {'function': 'distribute_tau_share'})
-
-@export
-def exec_distribute_dev_share_rtau():
-    execute('action_dev', {'function': 'distribute_rtau_share'})
 
 @export
 def swap_basic(basic_amount: float):
