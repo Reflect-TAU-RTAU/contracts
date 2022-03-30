@@ -1,6 +1,7 @@
 import currency as tau
 import con_reflecttau_v2 as rtau
-import con_rocketswap_official_v1_1 as rswp
+
+I = importlib
 
 metadata = Hash()
 
@@ -69,9 +70,10 @@ def withdraw_rtau(amount: float, to: str):
 @export
 def create_market(tau_amount: float, token_amount: float):
     rtau.assert_signer_is_operator()
-
     initial_liq_ready.set(True)
-    rswp.create_market(contract=rtau.contract(), currency_amount=tau_amount, token_amount=token_amount)
+
+    rswp = I.import_module(metadata['dex'])
+    return rswp.create_market(contract=rtau.contract(), currency_amount=tau_amount, token_amount=token_amount)
 
 @export
 def add_liquidity():
@@ -84,6 +86,8 @@ def add_liquidity():
     tau_balance = int(tau.balance_of(contract.get()))
     rtau_balance = int(rtau.balance_of(contract.get()))
     rtau_amount = int(tau_balance / rtau_price) + 1
+
+    rswp = I.import_module(metadata['dex'])
 
     if rtau_balance > rtau_amount:
         result = rswp.add_liquidity(contract=rtau.contract(), currency_amount=tau_balance)
@@ -98,7 +102,9 @@ def add_liquidity():
     return result
 
 def remove_liquidity(amount: float):
+    rswp = I.import_module(metadata['dex'])
     return rswp.remove_liquidity(contract=rtau.contract(), amount=amount)
 
 def transfer_liquidity(amount: float, to: str):
+    rswp = I.import_module(metadata['dex'])
     return rswp.transfer_liquidity(contract=rtau.contract(), to=to, amount=amount)
