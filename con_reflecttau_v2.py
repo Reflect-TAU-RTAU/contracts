@@ -157,7 +157,8 @@ def call(action: str, payload: dict):
 
 @export
 def external_call(action: str, payload: dict):
-    return execute(action, payload)
+    assert_signer_is_operator()
+    return call(action, payload)
 
 @export
 def swap_basic(basic_amount: float):
