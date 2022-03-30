@@ -37,6 +37,11 @@ def approve():
     rtau.approve(amount=999_999_999_999_999_999, to=metadata['dex'])
 
 @export
+def change_metadata(key: str, value: Any):
+    rtau.assert_signer_is_operator()
+    metadata[key] = value
+
+@export
 def sync_initial_liq_state():
     rtau.assert_signer_is_operator()
 
