@@ -11,7 +11,6 @@ initial_liq_ready = Variable()
 @construct
 def init():
     metadata['dex'] = 'con_rocketswap_official_v1_1'
-    # TODO: Do we need to do this or is it OK to use ctx.this ?
     contract.set(rtau.metadata('action_liquidity'))
     initial_liq_ready.set(False)
 
