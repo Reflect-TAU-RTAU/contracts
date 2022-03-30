@@ -7,8 +7,8 @@ metadata = Hash()
 
 @construct
 def init():
-	metadata['dex'] = 'con_rocketswap_official_v1_1'
-	approve()
+    metadata['dex'] = 'con_rocketswap_official_v1_1'
+    approve()
 
 @export
 def approve():
@@ -17,16 +17,16 @@ def approve():
 
 @export
 def change_metadata(key: str, value: Any):
-	rtau.assert_signer_is_operator()
-	metadata[key] = value
+    rtau.assert_signer_is_operator()
+    metadata[key] = value
 
 @export
 def execute(payload: dict, caller: str):
-	assert ctx.caller == rtau.contract(), 'You are not allowed to do that'
-	return buyback_and_burn()
+    assert ctx.caller == rtau.contract(), 'You are not allowed to do that'
+    return buyback_and_burn()
 
 def buyback_and_burn():
-	rswp = I.import_module(metadata['dex'])
-	rtau_amount = rswp.buy(contract=rtau.contract(), currency_amount=tau.balance_of(ctx.this))
-	rtau.transfer(rtau_amount, rtau.burn_address())
-	return rtau_amount
+    rswp = I.import_module(metadata['dex'])
+    rtau_amount = rswp.buy(contract=rtau.contract(), currency_amount=tau.balance_of(ctx.this))
+    rtau.transfer(rtau_amount, rtau.burn_address())
+    return rtau_amount
