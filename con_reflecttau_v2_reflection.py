@@ -3,7 +3,6 @@
 
 import currency as tau
 import con_reflecttau_v2 as rtau
-import con_rocketswap_official_v1_1 as rswp
 
 I = importlib
 
@@ -107,6 +106,7 @@ def process_taxes(taxes: float):
     # TODO: Are we able to send it with 'rtau.transfer()' instead?
     rtau.add_balance_to_reflect_action(amount=taxes)
 
+    rswp = I.import_module(metadata['dex'])
     tau_amount = rswp.sell(contract=rtau.contract(), token_amount=taxes)
     
     tau.transfer(amount=(tau_amount / 100 * taxes) / 100 * metadata['dev_perc_of_tax'], to=rtau.metadata('action_dev'))
