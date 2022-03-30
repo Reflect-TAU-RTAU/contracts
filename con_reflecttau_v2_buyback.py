@@ -14,6 +14,7 @@ def init():
 def approve():
     # Approve sending unlimited amount of TAU to DEX contract to be able to buy RTAU
     tau.approve(amount=999_999_999_999_999_999, to=metadata['dex'])
+    # Approve sending unlimited amount of RTAU to burn address
     rtau.approve(amount=999_999_999_999_999_999, to=rtau.burn_address())
 
 @export
