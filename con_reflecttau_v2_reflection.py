@@ -13,6 +13,7 @@ forward_holders_index = Hash(default_value=False)
 reverse_holders_index = Hash(default_value=False)
 
 holders_amount = Variable()
+initial_liq_ready = Variable()
 
 @construct
 def init():
@@ -20,12 +21,12 @@ def init():
     metadata['sell_tax'] = decimal(8)
     metadata['redistribute_perc'] = decimal(80)
     metadata['dev_perc_of_tax'] = decimal(20)
-    metadata['is_initial_liq_ready'] = False
     metadata['tau_pool'] = decimal(0)
     metadata['dex'] = 'con_rocketswap_official_v1_1'
     metadata['balance_limit'] = decimal(1_000)
 
     holders_amount.set(0)
+    initial_liq_ready.set(False)
 
     approve()
 
@@ -45,12 +46,12 @@ def change_metadata(key: str, value: Any):
 def sync_initial_liq_state():
     rtau.assert_signer_is_operator()
 
-    ready = I.import_module(rtau.metadata('action_liquidity')).metadata('is_initial_liq_ready')
-    metadata['is_initial_liq_ready'] = ready
+    ready = ForeignVariable(foreign_contract=rtau.metadata('action_liquidity'), foreign_name='initial_liq_ready')
+    initial_liq_ready.set(ready.get())
 
 @export
 def execute(payload: dict, caller: str):
-    assert ctx.caller == rtau.contract(), 'You are not allowed to do that - rtau.contract() =' + " " + rtau.contract()
+    assert ctx.caller == rtau.contract(), 'You are not allowed to do that'
 
     if payload['function'] == 'transfer':
         return process_transfer(payload['amount'], payload['to'], caller)
@@ -58,6 +59,7 @@ def execute(payload: dict, caller: str):
     if payload['function'] == 'transfer_from':
         return process_transfer(payload['amount'], payload['to'], caller, payload['main_account'])
     
+    # TODO: Could currently be executed by one operator - add requiring agreement
     if payload['function'] == 'add_to_holders_index':
         add_to_holders_index(payload['address'])
 
@@ -65,7 +67,7 @@ def process_transfer(amount: float, to: str, caller: str, main_account: str=""):
     if to == rtau.burn_address():
         return amount
 
-    if metadata['is_initial_liq_ready']:
+    if initial_liq_ready.get():
         # TODO: Set adding / removing from holders index correctly on each transfer?
 
         # DEX Buy
