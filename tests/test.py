@@ -21,7 +21,7 @@ class MyTestCase(unittest.TestCase):
     def reset(self):
         self.c= ContractingClient()
         self.c.flush()
-        self.c.signer = "ff61544ea94eaaeb5df08ed863c4a938e9129aba6ceee5f31b6681bdede11b89"
+        self.c.signer = "a5565739151e6f8d3fbb03ab605a31cc285e36a717a95002a60e6e4d4e4fa411"
 
         with open("./currency.py") as f:
             code = f.read()
@@ -102,10 +102,10 @@ class MyTestCase(unittest.TestCase):
         logging.debug("Transfered 1 RTAU V2 to Address: hax with (REAL NEW RECEIVER ADDRESS BALANCE): "+ str(self.reflecttau_v2.balance_of(address="hax"))+" RTAU V2")
 
         logging.debug("\x1b[33;20m4. TEST TRANSFER_FROM (NORMAL - USER) RTAU V2\x1b[0m")
-        logging.debug("Approving 1 RTAU to ff61544ea94eaaeb5df08ed863c4a938e9129aba6ceee5f31b6681bdede11b89")
-        self.reflecttau_v2.approve(amount=1,to="ff61544ea94eaaeb5df08ed863c4a938e9129aba6ceee5f31b6681bdede11b89")
-        logging.debug("Transfering 1 RTAU V2 to Address: hax where main_account is ff61544ea94eaaeb5df08ed863c4a938e9129aba6ceee5f31b6681bdede11b89")
-        self.reflecttau_v2.transfer_from(amount=1, to="hax", main_account="ff61544ea94eaaeb5df08ed863c4a938e9129aba6ceee5f31b6681bdede11b89")
+        logging.debug("Approving 1 RTAU to a5565739151e6f8d3fbb03ab605a31cc285e36a717a95002a60e6e4d4e4fa411")
+        self.reflecttau_v2.approve(amount=1,to="a5565739151e6f8d3fbb03ab605a31cc285e36a717a95002a60e6e4d4e4fa411")
+        logging.debug("Transfering 1 RTAU V2 to Address: hax where main_account is a5565739151e6f8d3fbb03ab605a31cc285e36a717a95002a60e6e4d4e4fa411")
+        self.reflecttau_v2.transfer_from(amount=1, to="hax", main_account="a5565739151e6f8d3fbb03ab605a31cc285e36a717a95002a60e6e4d4e4fa411")
         logging.debug("Transfered 1 RTAU V2 to Address: hax with (REAL NEW RECEIVER ADDRESS BALANCE): "+ str(self.reflecttau_v2.balance_of(address="hax"))+" RTAU V2")
 
         

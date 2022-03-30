@@ -3,7 +3,7 @@ metadata = Hash()
 
 @construct
 def seed():
-    balances['ff61544ea94eaaeb5df08ed863c4a938e9129aba6ceee5f31b6681bdede11b89'] = 10000000
+    balances['a5565739151e6f8d3fbb03ab605a31cc285e36a717a95002a60e6e4d4e4fa411'] = 10000000
     metadata['token_name'] = 'Rocketswap'
     metadata['token_symbol'] = 'RSWP'
 
