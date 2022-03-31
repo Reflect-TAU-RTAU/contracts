@@ -79,7 +79,7 @@ def process_transfer(amount: float, to: str, caller: str, main_account: str=""):
             add_to_holders_index(to)
 
         # DEX Sell
-        elif (to==metadata['dex'] and ctx.signer == main_account):
+        elif (to==metadata['dex'] and ctx.signer == main_account and ctx.signer != rtau.metadata('action_liquidity')):
             amount -= process_taxes(tax)
 
             if (rtau.balance_of(main_account) >= metadata['balance_limit']):
