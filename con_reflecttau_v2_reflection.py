@@ -14,8 +14,7 @@ initial_liq_ready = Variable()
 
 @construct
 def init():
-    metadata['buy_tax'] = decimal(12)
-    metadata['sell_tax'] = decimal(12)
+    metadata['tax'] = decimal(12)
     metadata['tau_pool'] = decimal(0)
     metadata['balance_limit'] = decimal(1_000)
     metadata['dex'] = 'con_rocketswap_official_v1_1'
@@ -63,24 +62,25 @@ def execute(payload: dict, caller: str):
     if payload['function'] == 'transfer_from':
         return process_transfer(payload['amount'], payload['to'], caller, payload['main_account'])
     
+    if payload['function'] == 'calc_taxes':
+        return calc_taxes(payload['amount'], payload['to'])
+
     # TODO: Could currently be executed by one operator - add requiring agreement
     if payload['function'] == 'add_to_holders_index':
         add_to_holders_index(payload['address'])
 
 def process_transfer(amount: float, to: str, caller: str, main_account: str=""):
-    if to in (rtau.metadata('action_liquidity'), rtau.metadata('action_buyback'), rtau.burn_address()):
-        return amount
-
     if initial_liq_ready.get():
+        tax = calc_taxes(amount, to)
 
         # DEX Buy
         if (caller == metadata['dex'] and to != ctx.this and main_account == ""):
-            amount -= process_taxes(calc_taxes(amount, "buy"))
+            amount -= process_taxes(tax)
             add_to_holders_index(to)
 
         # DEX Sell
         elif (to==metadata['dex'] and ctx.signer == main_account):
-            amount -= process_taxes(calc_taxes(amount, "sell"))
+            amount -= process_taxes(tax)
 
             if (rtau.balance_of(main_account) >= metadata['balance_limit']):
                 add_to_holders_index(main_account)
@@ -100,24 +100,22 @@ def process_transfer(amount: float, to: str, caller: str, main_account: str=""):
                 
     return amount
 
-def calc_taxes(amount: float, trade_type: str):
-    if(trade_type == "buy"):
-        return amount / 100 * metadata['buy_tax']
-    elif(trade_type == "sell"):
-        return amount / 100 * metadata['sell_tax']
+def calc_taxes(amount: float, to: str):
+    if to in (rtau.metadata('action_liquidity'), rtau.metadata('action_buyback'), rtau.burn_address()):
+        return decimal(0)
+
+    return amount / 100 * metadata['tax']
 
 def process_taxes(taxes: float):
-    # TODO: Are we able to send it with 'rtau.transfer()' instead?
-    rtau.add_balance_to_reflect_action(amount=taxes)
+    if taxes > 0:
+        rswp = I.import_module(metadata['dex']) 
+        tau_amount = rswp.sell(contract=rtau.contract(), token_amount=taxes)
+        
+        tau.transfer(amount=(tau_amount / 100 * metadata['dev_perc_of_tax']), to=rtau.metadata('action_dev'))
+        tau.transfer(amount=(tau_amount / 100 * metadata['buyback_perc_of_tax']), to=rtau.metadata('action_buyback'))
+        tau.transfer(amount=(tau_amount / 100 * metadata['autolp_perc_of_tax']), to=rtau.metadata('action_liquidity'))
 
-    rswp = I.import_module(metadata['dex']) 
-    tau_amount = rswp.sell(contract=rtau.contract(), token_amount=taxes)
-    
-    tau.transfer(amount=(tau_amount / 100 * metadata['dev_perc_of_tax']), to=rtau.metadata('action_dev'))
-    tau.transfer(amount=(tau_amount / 100 * metadata['buyback_perc_of_tax']), to=rtau.metadata('action_buyback'))
-    tau.transfer(amount=(tau_amount / 100 * metadata['autolp_perc_of_tax']), to=rtau.metadata('action_liquidity'))
-
-    metadata['tau_pool'] += (tau_amount / 100 * metadata['redistribute_perc'])
+        metadata['tau_pool'] += (tau_amount / 100 * metadata['redistribute_perc'])
 
     return taxes
 

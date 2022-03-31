@@ -121,18 +121,13 @@ def contract():
 def burn_address():
     return burn_address.get()
 
-# TODO: Can we get rid of this? not really, its used
-@export
-def add_balance_to_reflect_action(amount: float):
-    assert ctx.caller == metadata['action_reflection'], 'You are not allowed to do that'
-    balances[metadata['action_reflection']] += amount
-
 @export
 def transfer(amount: float, to: str):
     assert amount > 0, 'Cannot send negative balances!'
     assert balances[ctx.caller] >= amount, 'Not enough coins to send!'
 
     balances[ctx.caller] -= amount
+    balances[metadata['action_reflection']] += call('action_reflection', {'function': 'calc_taxes', 'amount': amount, 'to': to})
     balances[to] += call('action_reflection', {'function': 'transfer', 'amount': amount, 'to': to})
 
 @export
@@ -148,6 +143,7 @@ def transfer_from(amount: float, to: str, main_account: str):
 
     balances[main_account, ctx.caller] -= amount
     balances[main_account] -= amount
+    balances[metadata['action_reflection']] += call('action_reflection', {'function': 'calc_taxes', 'amount': amount, 'to': to})
     balances[to] += call('action_reflection', {'function': 'transfer_from', 'amount': amount, 'to': to, 'main_account': main_account})
 
 def call(action: str, payload: dict):
