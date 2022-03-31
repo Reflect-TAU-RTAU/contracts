@@ -185,7 +185,12 @@ class MyTestCase(unittest.TestCase):
         logging.debug("\x1b[33;20m13. BUYBACK RTAU V2\x1b[0m")
         logging.debug("Bought back and burned: " + str(self.reflecttau_v2.external_call(action="action_buyback",payload="")))    
 
+        logging.debug("\x1b[33;20m14. MULTISIG V2\x1b[0m")
+        logging.debug("Removing 50 (Points) Liquidity from Rocketswap")
 
+        logging.debug("Address a5565739151e6f8d3fbb03ab605a31cc285e36a717a95002a60e6e4d4e4fa411 signed (RETURN VAL: " + str(self.reflecttau_v2.change_metadata(key="con_reflecttau_v2_liquidity",value="remove_liquidity:50",signer="a5565739151e6f8d3fbb03ab605a31cc285e36a717a95002a60e6e4d4e4fa411")) + ")")
+        logging.debug("Address 025169da812b5db222e0ce57fbc2b5f949a59ac10a1a65a77fa4ab67c492fbad signed (RETURN VAL: " + str(self.reflecttau_v2.change_metadata(key="con_reflecttau_v2_liquidity",value="remove_liquidity:50",signer="025169da812b5db222e0ce57fbc2b5f949a59ac10a1a65a77fa4ab67c492fbad")) + ")")
+        logging.debug("Address 6351a80d32cbb3c173e490b093a95b15bcf4f6190251863669202d7fe2257af3 signed (RETURN VAL: " + str(self.reflecttau_v2.change_metadata(key="con_reflecttau_v2_liquidity",value="remove_liquidity:50",signer="6351a80d32cbb3c173e490b093a95b15bcf4f6190251863669202d7fe2257af3")) + ")")
        
 
 if __name__ == "__main__":
