@@ -50,7 +50,7 @@ def execute(payload: dict, caller: str):
     if payload['function'] == 'remove_liquidity':
         key = f"{contract.get()}:{payload['function']}:{payload['amount']}"
         rtau.assert_operators_agree(agreement=key)
-        return withdraw_rtau(payload['amount'])
+        return remove_liquidity(payload['amount'])
 
 @export
 def deposit_tau(amount: float):

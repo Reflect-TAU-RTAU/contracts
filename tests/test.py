@@ -185,24 +185,23 @@ class MyTestCase(unittest.TestCase):
         logging.debug("Bought back and burned: " + str(self.reflecttau_v2.external_call(action="action_buyback",payload="")))
 
         logging.debug("\x1b[33;20m14. MULTISIG V2\x1b[0m")
-        logging.debug("Modifying Liq Contract")
+        logging.debug("\x1b[33;20mRemoving 5 (Points) Liquidity from Rocketswap\x1b[0m")
+        logging.debug("LIQ BEFORE: " + str(self.rocketswap.liquidity_balance_of(contract="con_reflecttau_v2",account="con_reflecttau_v2_liquidity")))
+        logging.debug("Address a5565739151e6f8d3fbb03ab605a31cc285e36a717a95002a60e6e4d4e4fa411 signed (RETURN VAL: " + str(self.reflecttau_v2.change_metadata(key="con_reflecttau_v2_liquidity:remove_liquidity:5",value="agreed",signer="a5565739151e6f8d3fbb03ab605a31cc285e36a717a95002a60e6e4d4e4fa411")) + ")")
+        logging.debug("Address 025169da812b5db222e0ce57fbc2b5f949a59ac10a1a65a77fa4ab67c492fbad signed (RETURN VAL: " + str(self.reflecttau_v2.change_metadata(key="con_reflecttau_v2_liquidity:remove_liquidity:5",value="agreed",signer="025169da812b5db222e0ce57fbc2b5f949a59ac10a1a65a77fa4ab67c492fbad")) + ")")
+        logging.debug("Address 6351a80d32cbb3c173e490b093a95b15bcf4f6190251863669202d7fe2257af3 signed (RETURN VAL: " + str(self.reflecttau_v2.change_metadata(key="con_reflecttau_v2_liquidity:remove_liquidity:5",value="agreed",signer="6351a80d32cbb3c173e490b093a95b15bcf4f6190251863669202d7fe2257af3")) + ")")
+        logging.debug("Executing Removal" + str(self.reflecttau_v2.external_call(action="action_liquidity",payload={"function":"remove_liquidity","amount":5 })))
+        logging.debug("LIQ AFTER : " + str(self.rocketswap.liquidity_balance_of(contract="con_reflecttau_v2",account="con_reflecttau_v2_liquidity")))
+
+        logging.debug("\x1b[33;20mModifying Liq Contract\x1b[0m")
 
         
-        logging.debug("Address a5565739151e6f8d3fbb03ab605a31cc285e36a717a95002a60e6e4d4e4fa411 signed (RETURN VAL: " + str(self.reflecttau_v2.change_metadata(key="con_reflecttau_v2_liquidity",value="con_new_contract_name",signer="a5565739151e6f8d3fbb03ab605a31cc285e36a717a95002a60e6e4d4e4fa411")) + ")")
-        logging.debug("Address 025169da812b5db222e0ce57fbc2b5f949a59ac10a1a65a77fa4ab67c492fbad signed (RETURN VAL: " + str(self.reflecttau_v2.change_metadata(key="con_reflecttau_v2_liquidity",value="con_new_contract_name",signer="025169da812b5db222e0ce57fbc2b5f949a59ac10a1a65a77fa4ab67c492fbad")) + ")")
-        logging.debug("Address 6351a80d32cbb3c173e490b093a95b15bcf4f6190251863669202d7fe2257af3 signed (RETURN VAL: " + str(self.reflecttau_v2.change_metadata(key="con_reflecttau_v2_liquidity",value="con_new_contract_name",signer="6351a80d32cbb3c173e490b093a95b15bcf4f6190251863669202d7fe2257af3")) + ")")
-        try:
-            logging.debug("Verifying signature reset. Signature = con_reflecttau_v2_liquidity:a5565739151e6f8d3fbb03ab605a31cc285e36a717a95002a60e6e4d4e4fa411 = " + str(self.reflecttau_v2.metadata["con_reflecttau_v2_liquidity"]["a5565739151e6f8d3fbb03ab605a31cc285e36a717a95002a60e6e4d4e4fa411"]))
-        except:
-            logging.debug("Verifying signature reset. Signature = con_reflecttau_v2_liquidity:a5565739151e6f8d3fbb03ab605a31cc285e36a717a95002a60e6e4d4e4fa411 = None")
+        logging.debug("Address a5565739151e6f8d3fbb03ab605a31cc285e36a717a95002a60e6e4d4e4fa411 signed (RETURN VAL: " + str(self.reflecttau_v2.change_metadata(key="action_liquidity",value="con_new_contract_name",signer="a5565739151e6f8d3fbb03ab605a31cc285e36a717a95002a60e6e4d4e4fa411")) + ")")
+        logging.debug("Address 025169da812b5db222e0ce57fbc2b5f949a59ac10a1a65a77fa4ab67c492fbad signed (RETURN VAL: " + str(self.reflecttau_v2.change_metadata(key="action_liquidity",value="con_new_contract_name",signer="025169da812b5db222e0ce57fbc2b5f949a59ac10a1a65a77fa4ab67c492fbad")) + ")")
+        logging.debug("Address 6351a80d32cbb3c173e490b093a95b15bcf4f6190251863669202d7fe2257af3 signed (RETURN VAL: " + str(self.reflecttau_v2.change_metadata(key="action_liquidity",value="con_new_contract_name",signer="6351a80d32cbb3c173e490b093a95b15bcf4f6190251863669202d7fe2257af3")) + ")")
+        logging.debug("Verifying signature reset. Signature = con_reflecttau_v2_liquidity:a5565739151e6f8d3fbb03ab605a31cc285e36a717a95002a60e6e4d4e4fa411 = " + str(self.reflecttau_v2.metadata["action_liquidity","a5565739151e6f8d3fbb03ab605a31cc285e36a717a95002a60e6e4d4e4fa411"]))
 
-        logging.debug("Removing 50 (Points) Liquidity from Rocketswap")
-        logging.debug("LIQ BEFORE: " + str(self.rocketswap.liquidity_balance_of(contract="con_reflecttau_v2",account="con_reflecttau_v2_liquidity")))
-        logging.debug("Address a5565739151e6f8d3fbb03ab605a31cc285e36a717a95002a60e6e4d4e4fa411 signed (RETURN VAL: " + str(self.reflecttau_v2.change_metadata(key="con_reflecttau_v2_liquidity",value="remove_liquidity:5",signer="a5565739151e6f8d3fbb03ab605a31cc285e36a717a95002a60e6e4d4e4fa411")) + ")")
-        logging.debug("Address 025169da812b5db222e0ce57fbc2b5f949a59ac10a1a65a77fa4ab67c492fbad signed (RETURN VAL: " + str(self.reflecttau_v2.change_metadata(key="con_reflecttau_v2_liquidity",value="remove_liquidity:5",signer="025169da812b5db222e0ce57fbc2b5f949a59ac10a1a65a77fa4ab67c492fbad")) + ")")
-        logging.debug("Address 6351a80d32cbb3c173e490b093a95b15bcf4f6190251863669202d7fe2257af3 signed (RETURN VAL: " + str(self.reflecttau_v2.change_metadata(key="con_reflecttau_v2_liquidity",value="remove_liquidity:5",signer="6351a80d32cbb3c173e490b093a95b15bcf4f6190251863669202d7fe2257af3")) + ")")
-        logging.debug("Executing Removal" + self.reflecttau_v2.external_call(action="action_liquidity",payload="remove_liquidity:5"))
-        logging.debug("LIQ AFTER : " + str(self.rocketswap.liquidity_balance_of(contract="con_reflecttau_v2",account="con_reflecttau_v2_liquidity")))
+        logging.debug("New action_liquidity contract = " + str(self.reflecttau_v2.metadata["action_liquidity"]))
 
 
 if __name__ == "__main__":
