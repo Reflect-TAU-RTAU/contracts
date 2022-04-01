@@ -9,10 +9,10 @@ contract = Variable()
 initial_liq_ready = Variable()
 
 @construct
-def init():
+def init(name: str):
     metadata['dex'] = 'con_rocketswap_official_v1_1'
-    contract.set(rtau.metadata('action_liquidity'))
     initial_liq_ready.set(False)
+    contract.set(name)
 
     approve()
 
