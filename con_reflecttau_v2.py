@@ -7,14 +7,13 @@ action_interface = [I.Func('execute', args=('payload', 'caller'))]
 metadata = Hash()
 balances = Hash(default_value=0.0)
 
+contract = Variable()
 total_supply = Variable()
 swap_end_date = Variable()
-
 burn_address = Variable()
-contract = Variable()
 
 @construct
-def init():
+def init(name: str):
     balances[ctx.caller] = 0
 
     metadata['action_reflection'] = 'con_reflecttau_v2_reflection'
@@ -32,10 +31,10 @@ def init():
         '6351a80d32cbb3c173e490b093a95b15bcf4f6190251863669202d7fe2257af3'
     ]
 
+    contract.set(name)
     total_supply.set(0.0)
     burn_address.set('reflecttau_burn_address')
     swap_end_date.set(now + datetime.timedelta(days=180))
-    contract.set("con_reflecttau_v2")
 
 @export
 def change_metadata(key: str, value: Any):
