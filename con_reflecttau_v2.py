@@ -54,13 +54,13 @@ def change_metadata(key: str, value: Any):
     Save key and value for an operator. It's not globally
     set yet. Just temporarily saved for the current operator
     """
-    metadata[key][ctx.caller] = value
+    metadata[key, ctx.caller] = value
 
-    agreed = None
+    agreed = True
 
     # Check if all operators agree on the same value for the key
     for op in metadata['operators']:
-        if metadata[key][op] != metadata[key][ctx.caller]:
+        if metadata[key, op] != metadata[key, ctx.caller]:
             agreed = False
             break
 
@@ -75,7 +75,7 @@ def change_metadata(key: str, value: Any):
         can't be set immediately again by one operator
         """
         for op in metadata['operators']:
-            metadata[key][op] = hashlib.sha256(str(now))
+            metadata[key, op] = hashlib.sha256(str(now))
 
         return f'{key} = {value}'
 
