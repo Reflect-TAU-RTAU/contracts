@@ -140,8 +140,15 @@ def assert_operators_agree(agreement: str, one_time: bool=True):
         agreement_state = metadata[agreement_as_list[0], agreement_as_list[1], agreement_as_list[2], agreement_as_list[3]]
 
     assert agreement_state == 'agreed', 'No agreement met! Current State: ' + str(agreement_state)
-    #if one_time:
-        #metadata[agreement] = ''
+    if one_time:
+        if len(agreement_as_list) == 1:
+            metadata[agreement_as_list[0]] = ''
+        elif len(agreement_as_list) == 2:
+            metadata[agreement_as_list[0], agreement_as_list[1]] = ''
+        elif len(agreement_as_list) == 3:
+            metadata[agreement_as_list[0], agreement_as_list[1], agreement_as_list[2]] = ''
+        elif len(agreement_as_list) == 4:
+            metadata[agreement_as_list[0], agreement_as_list[1], agreement_as_list[2], agreement_as_list[3]] = ''
 
 @export
 def balance_of(address: str):
