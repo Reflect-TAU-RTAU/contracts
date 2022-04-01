@@ -75,10 +75,11 @@ def create_market(tau_amount: float, token_amount: float):
     return rswp.create_market(contract=rtau.contract(), currency_amount=tau_amount, token_amount=token_amount)
 
 @export
-def add_liquidity():
+def add_liquidity(without_buy:bool=False):
     rtau.assert_signer_is_operator()
+    if(without_buy == None or without_buy == False): #if we manually deposit tau and rtau to this contract after initial liq we can set this to true when adding liq
+        rswp = I.import_module(metadata['dex'])
     
-    rswp = I.import_module(metadata['dex'])
     rswp.buy(contract=rtau.contract(), currency_amount=tau.balance_of(contract.get()) / 2)
 
     rswp_prices = ForeignHash(foreign_contract=metadata['dex'], foreign_name='prices')
