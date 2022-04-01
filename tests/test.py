@@ -45,7 +45,7 @@ class MyTestCase(unittest.TestCase):
 
         with open("../con_reflecttau_v2.py") as f:
             code = f.read()
-            self.c.submit(code, name="con_reflecttau_v2")
+            self.c.submit(code, name="con_reflecttau_v2", constructor_args={'name': 'con_reflecttau_v2'})
 
         with open("../con_reflecttau_v2_reflection.py") as f:
             code = f.read()
