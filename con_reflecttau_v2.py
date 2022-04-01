@@ -109,7 +109,7 @@ def allowance(owner: str, spender: str):
     return balances[owner, spender]
 
 @export
-def metadata(key: str):
+def get_metadata(key: str):
     return metadata[key]
 
 @export

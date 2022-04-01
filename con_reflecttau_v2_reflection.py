@@ -36,7 +36,7 @@ def init():
 @export
 def approve():
     # Approve sending unlimited amount of TAU to developer action core contract for dev fees
-    tau.approve(amount=999_999_999_999_999_999, to=rtau.metadata('action_dev'))
+    tau.approve(amount=999_999_999_999_999_999, to=rtau.get_metadata('action_dev'))
     # Approve sending unlimited amount of RTAU to DEX contract to be able to sell RTAU
     rtau.approve(amount=999_999_999_999_999_999, to=metadata['dex'])
 
@@ -49,7 +49,7 @@ def change_metadata(key: str, value: Any):
 def sync_initial_liq_state():
     rtau.assert_signer_is_operator()
 
-    ready = ForeignVariable(foreign_contract=rtau.metadata('action_liquidity'), foreign_name='initial_liq_ready')
+    ready = ForeignVariable(foreign_contract=rtau.get_metadata('action_liquidity'), foreign_name='initial_liq_ready')
     initial_liq_ready.set(ready.get())
 
 @export
@@ -79,7 +79,7 @@ def process_transfer(amount: float, to: str, caller: str, main_account: str=""):
             add_to_holders_index(to)
 
         # DEX Sell
-        elif (to==metadata['dex'] and ctx.signer == main_account and ctx.signer != rtau.metadata('action_liquidity')):
+        elif (to==metadata['dex'] and ctx.signer == main_account and ctx.caller != rtau.get_metadata('action_liquidity')):
             amount -= process_taxes(tax)
 
             if (rtau.balance_of(main_account) >= metadata['balance_limit']):
@@ -101,7 +101,7 @@ def process_transfer(amount: float, to: str, caller: str, main_account: str=""):
     return amount
 
 def calc_taxes(amount: float, to: str):
-    if to in (rtau.metadata('action_liquidity'), rtau.metadata('action_buyback'), rtau.burn_address()):
+    if to in (rtau.get_metadata('action_liquidity'), rtau.get_metadata('action_buyback'), rtau.burn_address()):
         return decimal(0)
 
     return amount / 100 * metadata['tax']
@@ -111,9 +111,9 @@ def process_taxes(taxes: float):
         rswp = I.import_module(metadata['dex']) 
         tau_amount = rswp.sell(contract=rtau.contract(), token_amount=taxes)
         
-        tau.transfer(amount=(tau_amount / 100 * metadata['dev_perc_of_tax']), to=rtau.metadata('action_dev'))
-        tau.transfer(amount=(tau_amount / 100 * metadata['buyback_perc_of_tax']), to=rtau.metadata('action_buyback'))
-        tau.transfer(amount=(tau_amount / 100 * metadata['autolp_perc_of_tax']), to=rtau.metadata('action_liquidity'))
+        tau.transfer(amount=(tau_amount / 100 * metadata['dev_perc_of_tax']), to=rtau.get_metadata('action_dev'))
+        tau.transfer(amount=(tau_amount / 100 * metadata['buyback_perc_of_tax']), to=rtau.get_metadata('action_buyback'))
+        tau.transfer(amount=(tau_amount / 100 * metadata['autolp_perc_of_tax']), to=rtau.get_metadata('action_liquidity'))
 
         metadata['tau_pool'] += (tau_amount / 100 * metadata['redistribute_perc'])
 
