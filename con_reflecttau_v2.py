@@ -56,20 +56,19 @@ def change_metadata(key: str, value: Any):
     Save key and value for an operator. It's not globally
     set yet. Just temporarily saved for the current operator
     """
-    assert 1!=1, metadata.set()
-    metadata.set(*[*key_list, ctx.caller], value)
+    metadata.set(*[*key_list, ctx.caller], value) #1 need fix
 
     agreed = True
 
     # Check if all operators agree on the same value for the key
     for op in metadata['operators']:
-        if metadata.get(*key_list, op) != metadata.get(*key_list, ctx.caller):
+        if metadata.get(*key_list, op) != metadata.get(*key_list, ctx.caller): #2 need fix
             agreed = False
             break
 
     if agreed:
         # Since all operators agree, set new value
-        metadata.set(*key_list, value)
+        metadata.set(*key_list, value) #3 need fix
         
         """
         Since agreement was met and the value set,
@@ -78,7 +77,7 @@ def change_metadata(key: str, value: Any):
         can't be set immediately again by one operator
         """
         for op in metadata['operators']:
-            metadata.set(*[*key_list, op], hashlib.sha256(str(now)))
+            metadata.set(*[*key_list, op], hashlib.sha256(str(now))) #4 need fix
 
         return f'{key} = {value}'
 
@@ -100,7 +99,7 @@ def assert_operators_agree(agreement: str, one_time: bool=True):
     """
     agreement_list = agreement.split(":")
 
-    assert metadata.get(*agreement_list) == 'agreed', 'No agreement met!'
+    assert metadata.get(*agreement_list) == 'agreed', 'No agreement met!' #5 need fix
 
     if one_time:
         metadata.set(*agreement_list, '')
