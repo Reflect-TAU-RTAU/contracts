@@ -50,51 +50,25 @@ def change_metadata(key: str, value: Any):
         error = 'Action contract does not follow the correct interface!'
         assert I.enforce_interface(con, action_interface), error
 
+    key_list = key.split(":")
+
     """
     Save key and value for an operator. It's not globally
     set yet. Just temporarily saved for the current operator
     """
-    key_as_list = key.split(":")
-    if len(key_as_list) == 1:
-        metadata[key_as_list[0], ctx.caller] = value
-    elif len(key_as_list) == 2:
-        metadata[key_as_list[0], key_as_list[1], ctx.caller] = value
-    elif len(key_as_list) == 3:
-        metadata[key_as_list[0], key_as_list[1], key_as_list[2], ctx.caller] = value
-    elif len(key_as_list) == 4:
-        metadata[key_as_list[0], key_as_list[1], key_as_list[2], key_as_list[3], ctx.caller] = value
+    metadata.set(*[*key_list, ctx.caller], value)
 
     agreed = True
 
     # Check if all operators agree on the same value for the key
     for op in metadata['operators']:
-        if len(key_as_list) == 1:
-            caller_agreement = metadata[key_as_list[0], ctx.caller]
-            op_agreement = metadata[key_as_list[0], op]
-        elif len(key_as_list) == 2:
-            caller_agreement = metadata[key_as_list[0], key_as_list[1], ctx.caller]
-            op_agreement = metadata[key_as_list[0], key_as_list[1], op]
-        elif len(key_as_list) == 3:
-            caller_agreement = metadata[key_as_list[0], key_as_list[1], key_as_list[2], ctx.caller]
-            op_agreement = metadata[key_as_list[0], key_as_list[1], key_as_list[2], op]
-        elif len(key_as_list) == 4:
-            caller_agreement = metadata[key_as_list[0], key_as_list[1], key_as_list[2], key_as_list[3], ctx.caller]
-            op_agreement = metadata[key_as_list[0], key_as_list[1], key_as_list[2], key_as_list[3], op]
-
-        if op_agreement != caller_agreement:
+        if metadata.get(*key_list, op) != metadata.get(*key_list, ctx.caller)
             agreed = False
             break
 
     if agreed:
         # Since all operators agree, set new value
-        if len(key_as_list) == 1:
-            metadata[key_as_list[0]] = value
-        elif len(key_as_list) == 2:
-            metadata[key_as_list[0], key_as_list[1]] = "agreed"
-        elif len(key_as_list) == 3:
-            metadata[key_as_list[0], key_as_list[1], key_as_list[2]] = "agreed"
-        elif len(key_as_list) == 4:
-            metadata[key_as_list[0], key_as_list[1], key_as_list[2], key_as_list[3]] = "agreed"
+        metadata.set(*key_list, value)
         
         """
         Since agreement was met and the value set,
@@ -103,14 +77,8 @@ def change_metadata(key: str, value: Any):
         can't be set immediately again by one operator
         """
         for op in metadata['operators']:
-            if len(key_as_list) == 1:
-                metadata[key_as_list[0], op] = hashlib.sha256(str(now))
-            elif len(key_as_list) == 2:
-                metadata[key_as_list[0], key_as_list[1], op] = hashlib.sha256(str(now))
-            elif len(key_as_list) == 3:
-                metadata[key_as_list[0], key_as_list[1], key_as_list[2], op] = hashlib.sha256(str(now))
-            elif len(key_as_list) == 4:
-                metadata[key_as_list[0], key_as_list[1], key_as_list[2], key_as_list[3], op] = hashlib.sha256(str(now)) 
+            metadata.set(*[*key_list, op], hashlib.sha256(str(now)))
+
         return f'{key} = {value}'
 
 @export
@@ -129,26 +97,12 @@ def assert_operators_agree(agreement: str, one_time: bool=True):
     empty string after checking, to not allow execution
     again without a new agreement from all operators.
     """
-    agreement_as_list = agreement.split(":")
-    if len(agreement_as_list) == 1:
-        agreement_state = metadata[agreement_as_list[0]]
-    elif len(agreement_as_list) == 2:
-        agreement_state = metadata[agreement_as_list[0], agreement_as_list[1]]
-    elif len(agreement_as_list) == 3:
-        agreement_state = metadata[agreement_as_list[0], agreement_as_list[1], agreement_as_list[2]]
-    elif len(agreement_as_list) == 4:
-        agreement_state = metadata[agreement_as_list[0], agreement_as_list[1], agreement_as_list[2], agreement_as_list[3]]
+    agreement_list = agreement.split(":")
 
-    assert agreement_state == 'agreed', 'No agreement met! Current State: ' + str(agreement_state)
+    assert metadata.get(*agreement_list) = 'agreed', 'No agreement met!'
+
     if one_time:
-        if len(agreement_as_list) == 1:
-            metadata[agreement_as_list[0]] = ''
-        elif len(agreement_as_list) == 2:
-            metadata[agreement_as_list[0], agreement_as_list[1]] = ''
-        elif len(agreement_as_list) == 3:
-            metadata[agreement_as_list[0], agreement_as_list[1], agreement_as_list[2]] = ''
-        elif len(agreement_as_list) == 4:
-            metadata[agreement_as_list[0], agreement_as_list[1], agreement_as_list[2], agreement_as_list[3]] = ''
+        metadata.set(*agreement_list, '')
 
 @export
 def balance_of(address: str):
