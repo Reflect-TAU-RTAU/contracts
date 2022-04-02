@@ -49,15 +49,15 @@ class MyTestCase(unittest.TestCase):
 
         with open("../con_reflecttau_v2_reflection.py") as f:
             code = f.read()
-            self.c.submit(code, name="con_reflecttau_v2_reflection")
+            self.c.submit(code, name="con_reflecttau_v2_reflection", constructor_args={'name': 'con_reflecttau_v2_reflection'})
 
         with open("../con_reflecttau_v2_buyback.py") as f:
             code = f.read()
-            self.c.submit(code, name="con_reflecttau_v2_buyback")
+            self.c.submit(code, name="con_reflecttau_v2_buyback", constructor_args={'name': 'con_reflecttau_v2_buyback'})
 
         with open("../con_reflecttau_v2_developer.py") as f:
             code = f.read()
-            self.c.submit(code, name="con_reflecttau_v2_developer")
+            self.c.submit(code, name="con_reflecttau_v2_developer", constructor_args={'name': 'con_reflecttau_v2_developer'})
         
         with open("../con_reflecttau_v2_liquidity.py") as f:
             code = f.read()
@@ -65,7 +65,7 @@ class MyTestCase(unittest.TestCase):
         
         with open("../con_reflecttau_v2_treasury.py") as f:
             code = f.read()
-            self.c.submit(code, name="con_reflecttau_v2_treasury")
+            self.c.submit(code, name="con_reflecttau_v2_treasury", constructor_args={'name': 'con_reflecttau_v2_treasury'})
 
 
         self.currency = self.c.get_contract("currency")

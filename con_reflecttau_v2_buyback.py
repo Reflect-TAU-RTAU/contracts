@@ -5,9 +5,12 @@ I = importlib
 
 metadata = Hash()
 
+contract = Variable()
+
 @construct
-def init():
+def init(name: str):
     metadata['dex'] = 'con_rocketswap_official_v1_1'
+    contract.set(name)
     approve()
 
 @export
@@ -30,6 +33,6 @@ def execute(payload: dict, caller: str):
 def buyback_and_burn():
     rswp = I.import_module(metadata['dex'])
     
-    rtau_amount = rswp.buy(contract=rtau.contract(), currency_amount=tau.balance_of(ctx.this))
-    rtau.transfer(amount=rtau.balance_of(ctx.this), to=rtau.burn_address())
+    rtau_amount = rswp.buy(contract=rtau.contract(), currency_amount=tau.balance_of(contract.get()))
+    rtau.transfer(amount=rtau.balance_of(contract.get()), to=rtau.burn_address())
     return rtau_amount

@@ -9,11 +9,12 @@ reflections = Hash(default_value=0.0)
 forward_holders_index = Hash(default_value=False)
 reverse_holders_index = Hash(default_value=False)
 
+contract = Variable()
 holders_amount = Variable()
 initial_liq_ready = Variable()
 
 @construct
-def init():
+def init(name: str):
     metadata['tax'] = decimal(12)
     metadata['tau_pool'] = decimal(0)
     metadata['balance_limit'] = decimal(1_000)
@@ -28,6 +29,7 @@ def init():
     # Auto-LP
     metadata['autolp_perc_of_tax'] = 8.33
 
+    contract.set(name)
     holders_amount.set(0)
     initial_liq_ready.set(False)
 
@@ -74,7 +76,7 @@ def process_transfer(amount: float, to: str, caller: str, main_account: str=""):
         tax = calc_taxes(amount, to)
 
         # DEX Buy
-        if (caller == metadata['dex'] and to != ctx.this and main_account == ""):
+        if (caller == metadata['dex'] and to != contract.get() and main_account == ""):
             amount -= process_taxes(tax)
             add_to_holders_index(to)
 
