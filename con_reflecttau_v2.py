@@ -41,8 +41,8 @@ def change_metadata(key: str, value: Any):
     assert_signer_is_operator()
 
     """
-    If it is an action core contract, make sure that the
-    contract exists and follows the agreed on interface
+    If we are setting an action core contract, make sure that the 
+    value is an existing contract and follows the agreed on interface
     """
     if key.startswith('action_'):
         con = I.import_module(value)
@@ -51,28 +51,28 @@ def change_metadata(key: str, value: Any):
         assert I.enforce_interface(con, action_interface), error
 
     """
-    Save key and value for an operator. It's not globally
-    set yet. Just temporarily saved for the current operator
+    Save key and value for an operator. This entry symbolizes 
+    the agreement of ctx.caller to set the metadata.
     """
     metadata[key, ctx.caller] = value
 
     agreed = True
 
-    # Check if all operators agree on the same value for the key
+    # Check if all operators agree on setting the same value for key
     for op in metadata['operators']:
         if metadata[key, op] != metadata[key, ctx.caller]:
             agreed = False
             break
 
     if agreed:
-        # Since all operators agree, set new value
+        # Since all operators agree, set new value for key
         metadata[key] = value
         
         """
         Since agreement was met and the value set,
-        let's set each individual agreement to a
+        let's set the agreement for each operator to a
         different value so that one-time agreements
-        can't be set immediately again by one operator
+        can't be used more than once by some operator
         """
         for op in metadata['operators']:
             metadata[key, op] = hashlib.sha256(str(now))
