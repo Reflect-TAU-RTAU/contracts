@@ -28,7 +28,9 @@ def change_metadata(key: str, value: Any):
 @export
 def execute(payload: dict, caller: str):
     assert ctx.caller == rtau.contract(), 'You are not allowed to do that'
-    return buyback_and_burn()
+
+    if payload['function'] == 'buyback_and_burn':
+        return buyback_and_burn()
 
 def buyback_and_burn():
     rswp = I.import_module(metadata['dex'])
