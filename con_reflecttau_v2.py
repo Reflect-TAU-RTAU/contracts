@@ -129,6 +129,15 @@ def transfer(amount: float, to: str):
     assert amount > 0, 'Cannot send negative balances!'
     assert balances[ctx.caller] >= amount, 'Not enough coins to send!'
 
+    """
+    1. Set balance of sender to 'balance - amount'
+
+    2. Set balance of reflection contract to 'fees 
+    calculated by reflection contract'
+
+    3. Set balance of receiver to 'balance + amount - fees'
+    """
+
     balances[ctx.caller] -= amount
     balances[metadata['action_reflection']] += call('action_reflection', {'function': 'calc_taxes', 'amount': amount, 'to': to})
     balances[to] += call('action_reflection', {'function': 'transfer', 'amount': amount, 'to': to})
@@ -143,6 +152,17 @@ def transfer_from(amount: float, to: str, main_account: str):
     assert amount > 0, 'Cannot send negative balances!'
     assert balances[main_account, ctx.caller] >= amount, f'You approved {balances[main_account, ctx.caller]} but need {amount}'
     assert balances[main_account] >= amount, 'Not enough coins to send! '
+
+    """
+    1. Reduce allowances of sender by amount
+
+    2. Set balance of sender to 'balance - amount'
+
+    3. Set balance of reflection contract to 'fees 
+    calculated by reflection contract'
+
+    4. Set balance of receiver to 'balance + amount - fees'
+    """
 
     balances[main_account, ctx.caller] -= amount
     balances[main_account] -= amount
