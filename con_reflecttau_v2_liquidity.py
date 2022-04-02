@@ -32,22 +32,22 @@ def execute(payload: dict, caller: str):
     assert ctx.caller == rtau.contract(), 'You are not allowed to do that'
 
     if payload['function'] == 'withdraw_tau':
-        key = f"{contract.get()}:{payload['function']}:{payload['amount']}:{payload['to']}"
+        key = f"{contract.get()}#{payload['function']}#{payload['amount']}#{payload['to']}"
         rtau.assert_operators_agree(agreement=key)
         return withdraw_tau(payload['amount'], payload['to'])
 
     if payload['function'] == 'withdraw_rtau':
-        key = f"{contract.get()}:{payload['function']}:{payload['amount']}:{payload['to']}"
+        key = f"{contract.get()}#{payload['function']}#{payload['amount']}#{payload['to']}"
         rtau.assert_operators_agree(agreement=key)
         return withdraw_rtau(payload['amount'], payload['to'])
 
     if payload['function'] == 'transfer_liquidity':
-        key = f"{contract.get()}:{payload['function']}:{payload['amount']}:{payload['to']}"
+        key = f"{contract.get()}#{payload['function']}#{payload['amount']}#{payload['to']}"
         rtau.assert_operators_agree(agreement=key)
         return transfer_liquidity(payload['amount'], payload['to'])
 
     if payload['function'] == 'remove_liquidity':
-        key = f"{contract.get()}:{payload['function']}:{payload['amount']}"
+        key = f"{contract.get()}#{payload['function']}#{payload['amount']}"
         rtau.assert_operators_agree(agreement=key)
         return remove_liquidity(payload['amount'])
 

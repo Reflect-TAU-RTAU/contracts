@@ -44,31 +44,29 @@ def change_metadata(key: str, value: Any):
     If it is an action core contract, make sure that the
     contract exists and follows the agreed on interface
     """
-    if isinstance(value, str) and value.startswith('action_'):
+    if key.startswith('action_'):
         con = I.import_module(value)
 
         error = 'Action contract does not follow the correct interface!'
         assert I.enforce_interface(con, action_interface), error
 
-    key_list = key.split(":")
-
     """
     Save key and value for an operator. It's not globally
     set yet. Just temporarily saved for the current operator
     """
-    metadata.set(*[*key_list, ctx.caller], value) #TODO:1 need fix
+    metadata[key, ctx.caller] = value
 
     agreed = True
 
     # Check if all operators agree on the same value for the key
     for op in metadata['operators']:
-        if metadata.get(*key_list, op) != metadata.get(*key_list, ctx.caller): #TODO:2 need fix
+        if metadata[key, op] != metadata[key, ctx.caller]:
             agreed = False
             break
 
     if agreed:
         # Since all operators agree, set new value
-        metadata.set(*key_list, value) #3 need fix
+        metadata[key] = value
         
         """
         Since agreement was met and the value set,
@@ -77,7 +75,7 @@ def change_metadata(key: str, value: Any):
         can't be set immediately again by one operator
         """
         for op in metadata['operators']:
-            metadata.set(*[*key_list, op], hashlib.sha256(str(now))) #TODO:4 need fix
+            metadata[key, op] = hashlib.sha256(str(now))
 
         return f'{key} = {value}'
 
@@ -97,12 +95,10 @@ def assert_operators_agree(agreement: str, one_time: bool=True):
     empty string after checking, to not allow execution
     again without a new agreement from all operators.
     """
-    agreement_list = agreement.split(":")
-
-    assert metadata.get(*agreement_list) == 'agreed', 'No agreement met!' #TODO:5 need fix
+    assert metadata[agreement] == 'agreed', 'No agreement met!'
 
     if one_time:
-        metadata.set(*agreement_list, '') #TODO:6 need fix
+        metadata[agreement] = ''
 
 @export
 def balance_of(address: str):

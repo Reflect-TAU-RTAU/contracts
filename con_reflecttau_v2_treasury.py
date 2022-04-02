@@ -20,7 +20,7 @@ def change_metadata(key: str, value: Any):
 def execute(payload: dict, caller: str):
 	assert ctx.caller == rtau.contract(), 'You are not allowed to do that'
 
-	key = f"{contract.get()}:{payload['function']}:{payload['amount']}:{payload['to']}"
+	key = f"{contract.get()}#{payload['function']}#{payload['amount']}#{payload['to']}"
 	rtau.assert_operators_agree(agreement=key)
 
 	if payload['function'] == 'withdraw_token':
