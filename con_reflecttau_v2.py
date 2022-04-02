@@ -176,6 +176,8 @@ def call(action: str, payload: dict):
 @export
 def external_call(action: str, payload: dict):
     assert_signer_is_operator()
+
+    payload['external'] = True
     return call(action, payload)
 
 @export

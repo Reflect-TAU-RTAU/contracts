@@ -59,17 +59,19 @@ def execute(payload: dict, caller: str):
     assert ctx.caller == rtau.contract(), 'You are not allowed to do that'
 
     if payload['function'] == 'transfer':
+        assert not 'external' in payload, 'External call not allowed!'
         return process_transfer(payload['amount'], payload['to'], caller)
 
     if payload['function'] == 'transfer_from':
+        assert not 'external' in payload, 'External call not allowed!'
         return process_transfer(payload['amount'], payload['to'], caller, payload['main_account'])
     
+    if payload['function'] == 'add_to_holders_index':
+        assert not 'external' in payload, 'External call not allowed!'
+        add_to_holders_index(payload['address'])
+
     if payload['function'] == 'calc_taxes':
         return calc_taxes(payload['amount'], payload['to'])
-
-    # TODO: Could currently be executed by one operator - add requiring agreement
-    if payload['function'] == 'add_to_holders_index':
-        add_to_holders_index(payload['address'])
 
 def process_transfer(amount: float, to: str, caller: str, main_account: str=""):
     if initial_liq_ready.get():
