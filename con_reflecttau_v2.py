@@ -58,7 +58,7 @@ def change_metadata(key: str, value: Any):
 
     agreed = True
 
-    # Check if all operators agree on setting the same value for key
+    # Check if all operators agree on setting same value for key
     for op in metadata['operators']:
         if metadata[key, op] != metadata[key, ctx.caller]:
             agreed = False
@@ -87,13 +87,13 @@ def assert_operators_agree(agreement: str, one_time: bool=True):
     contract before they execute.
 
     The agreement keys need to have the following form:
-    <action_contract>:<function>:<arg_1>:<arg_2>:...
+    <action_contract>#<function>#<arg_1>#<arg_2>:...
 
     The value needs to be: "agreed"
 
     If it is a 'one_time' agreement, it will be set to an
     empty string after checking, to not allow execution
-    again without a new agreement from all operators.
+    again without new agreement from all operators.
     """
     assert metadata[agreement] == 'agreed', 'No agreement met!'
 
@@ -166,12 +166,25 @@ def transfer_from(amount: float, to: str, main_account: str):
     balances[to] += call('action_reflection', {'function': 'transfer_from', 'amount': amount, 'to': to, 'main_account': main_account})
 
 def call(action: str, payload: dict):
+    # Call action core contract functions from within this contract
     assert metadata[action] is not None, 'Invalid action!'
     return I.import_module(metadata[action]).execute(payload, ctx.caller)
 
 @export
 def external_call(action: str, payload: dict):
     assert_signer_is_operator()
+
+    """
+    Call action core contract functions externally. 
+    To mark that it was an external call, the key 
+    'external' will be added to the payload. Action 
+    core contracts can check for that key and know 
+    if a call came from the main token contract or 
+    from outside.
+    """
+
+    if not payload:
+        payload = {}
 
     payload['external'] = True
     return call(action, payload)
@@ -186,7 +199,7 @@ def swap_basic(basic_amount: float):
         amount=basic_amount, 
         to=burn_address.get())
 
-    swap_amount = basic_amount / 100
+    swap_amount = basic_amount
     total_supply.set(total_supply.get() + swap_amount)
     balances[ctx.caller] += swap_amount
 
@@ -202,8 +215,7 @@ def swap_rtau(rtau_amount: float):
         amount=rtau_amount, 
         to=burn_address.get())
 
-    # TODO: Set correct swap factor
-    swap_amount = rtau_amount / 10000
+    swap_amount = rtau_amount / 39
     total_supply.set(total_supply.get() + swap_amount)
     balances[ctx.caller] += swap_amount
 
