@@ -125,14 +125,15 @@ def remove_from_holders_index(address: str):
         reverse_holders_index[address] = False
 
 @export
-def redistribute_tau(start: int=0, end: int=0, reset_pool: bool=True):
+def redistribute_tau(start: int=None, end: int=None, reset_pool: bool=None):
     rtau.assert_signer_is_operator()
 
-    # TODO: wtf this is None and not default 0
-    if start == None and end == None:
+    if start == None:
         start = 1
+
+    if end == None:
         end = holders_amount.get() + 1
-    
+
     if reset_pool == None:
         reset_pool = True
 
@@ -143,7 +144,6 @@ def redistribute_tau(start: int=0, end: int=0, reset_pool: bool=True):
             holder_balance_share = rtau.balance_of(address=forward_holders_index[holder_id]) / supply * 100
             reflections[forward_holders_index[holder_id]] += metadata["tau_pool"] / 100 * holder_balance_share
 
-    # TODO: this is not True by default
     if reset_pool:
         metadata['tau_pool'] = decimal(0)
 
