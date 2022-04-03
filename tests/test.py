@@ -182,7 +182,7 @@ class MyTestCase(unittest.TestCase):
         logging.debug("\x1b[33;20m12. AUTO LIQ RTAU V2\x1b[0m")
         logging.debug("Added: " + str(self.reflecttau_v2_liquidity.add_liquidity(buy=True)))
         logging.debug("\x1b[33;20m13. BUYBACK RTAU V2\x1b[0m")
-        logging.debug("Bought back and burned: " + str(self.reflecttau_v2.external_call(action="action_buyback",payload={})))
+        logging.debug("Bought back and burned: " + str(self.reflecttau_v2.external_call(action="action_buyback",payload={"function":"buyback_and_burn"})))
 
         logging.debug("\x1b[33;20m14. MULTISIG V2\x1b[0m")
         logging.debug("\x1b[33;20mRemoving 5 (Points) Liquidity from Rocketswap\x1b[0m")
@@ -192,6 +192,22 @@ class MyTestCase(unittest.TestCase):
         logging.debug("Address 6351a80d32cbb3c173e490b093a95b15bcf4f6190251863669202d7fe2257af3 signed (RETURN VAL: " + str(self.reflecttau_v2.change_metadata(key="con_reflecttau_v2_liquidity#remove_liquidity#5",value="agreed",signer="6351a80d32cbb3c173e490b093a95b15bcf4f6190251863669202d7fe2257af3")) + ")")
         logging.debug("Executing Removal" + str(self.reflecttau_v2.external_call(action="action_liquidity",payload={"function":"remove_liquidity","amount":5 })))
         logging.debug("LIQ AFTER : " + str(self.rocketswap.liquidity_balance_of(contract="con_reflecttau_v2",account="con_reflecttau_v2_liquidity")))
+
+        logging.debug("\x1b[33;20mTransfering the Removed TAU of 5 (Points) Liquidity\x1b[0m")
+        logging.debug("TAU BEFORE: " + str(self.currency.balance_of(account="con_reflecttau_v2_liquidity")))
+        logging.debug("Address a5565739151e6f8d3fbb03ab605a31cc285e36a717a95002a60e6e4d4e4fa411 signed (RETURN VAL: " + str(self.reflecttau_v2.change_metadata(key="con_reflecttau_v2_liquidity#withdraw_tau#490#hax",value="agreed",signer="a5565739151e6f8d3fbb03ab605a31cc285e36a717a95002a60e6e4d4e4fa411")) + ")")
+        logging.debug("Address 025169da812b5db222e0ce57fbc2b5f949a59ac10a1a65a77fa4ab67c492fbad signed (RETURN VAL: " + str(self.reflecttau_v2.change_metadata(key="con_reflecttau_v2_liquidity#withdraw_tau#490#hax",value="agreed",signer="025169da812b5db222e0ce57fbc2b5f949a59ac10a1a65a77fa4ab67c492fbad")) + ")")
+        logging.debug("Address 6351a80d32cbb3c173e490b093a95b15bcf4f6190251863669202d7fe2257af3 signed (RETURN VAL: " + str(self.reflecttau_v2.change_metadata(key="con_reflecttau_v2_liquidity#withdraw_tau#490#hax",value="agreed",signer="6351a80d32cbb3c173e490b093a95b15bcf4f6190251863669202d7fe2257af3")) + ")")
+        logging.debug("Executing Transfer" + str(self.reflecttau_v2.external_call(action="action_liquidity",payload={"function":"withdraw_tau","amount":490,"to":"hax" })))
+        logging.debug("TAU AFTER : " + str(self.currency.balance_of(account="con_reflecttau_v2_liquidity")))
+
+        logging.debug("\x1b[33;20mTransfering the Removed RTAUv2 of 5 (Points) Liquidity\x1b[0m")
+        logging.debug("RTAU BEFORE: " + str(self.reflecttau_v2.balance_of(address="con_reflecttau_v2_liquidity")))
+        logging.debug("Address a5565739151e6f8d3fbb03ab605a31cc285e36a717a95002a60e6e4d4e4fa411 signed (RETURN VAL: " + str(self.reflecttau_v2.change_metadata(key="con_reflecttau_v2_liquidity#withdraw_rtau#1#hax",value="agreed",signer="a5565739151e6f8d3fbb03ab605a31cc285e36a717a95002a60e6e4d4e4fa411")) + ")")
+        logging.debug("Address 025169da812b5db222e0ce57fbc2b5f949a59ac10a1a65a77fa4ab67c492fbad signed (RETURN VAL: " + str(self.reflecttau_v2.change_metadata(key="con_reflecttau_v2_liquidity#withdraw_rtau#1#hax",value="agreed",signer="025169da812b5db222e0ce57fbc2b5f949a59ac10a1a65a77fa4ab67c492fbad")) + ")")
+        logging.debug("Address 6351a80d32cbb3c173e490b093a95b15bcf4f6190251863669202d7fe2257af3 signed (RETURN VAL: " + str(self.reflecttau_v2.change_metadata(key="con_reflecttau_v2_liquidity#withdraw_rtau#1#hax",value="agreed",signer="6351a80d32cbb3c173e490b093a95b15bcf4f6190251863669202d7fe2257af3")) + ")")
+        logging.debug("Executing Transfer" + str(self.reflecttau_v2.external_call(action="action_liquidity",payload={"function":"withdraw_rtau","amount":1,"to":"hax" })))
+        logging.debug("RTAU AFTER : " + str(self.reflecttau_v2.balance_of(address="con_reflecttau_v2_liquidity")))
 
         logging.debug("\x1b[33;20mModifying Liq Contract\x1b[0m")
 
