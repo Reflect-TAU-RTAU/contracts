@@ -87,7 +87,7 @@ def assert_operators_agree(agreement: str, one_time: bool=True):
     contract before they execute.
 
     The agreement keys need to have the following form:
-    <action_contract>#<function>#<arg_1>#<arg_2>:...
+    <action_contract>#<function>#<arg_1>#<arg_2>#...
 
     The value needs to be: "agreed"
 
