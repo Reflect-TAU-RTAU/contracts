@@ -122,7 +122,6 @@ class MyTestCase(unittest.TestCase):
         logging.debug("Depositing RTAU to Liq contract " + str(self.reflecttau_v2_liquidity.deposit_rtau(amount=1000)))
         logging.debug("Depositing TAU to Liq contract " + str(self.reflecttau_v2_liquidity.deposit_tau(amount=200)))
         logging.debug("RTAU V2 Pair created: " + str(self.reflecttau_v2_liquidity.create_market(tau_amount=200,token_amount=1000)))
-        logging.debug("Sync Liq State: " + str(self.reflecttau_v2_reflection.sync_initial_liq_state()))
         
 
         logging.debug("\x1b[33;20m7. TEST BUY RTAU V2\x1b[0m")

@@ -6,12 +6,10 @@ I = importlib
 metadata = Hash()
 
 contract = Variable()
-initial_liq_ready = Variable()
 
 @construct
 def init(name: str):
     metadata['dex'] = 'con_rocketswap_official_v1_1'
-    initial_liq_ready.set(False)
     contract.set(name)
     approve()
 
@@ -68,8 +66,6 @@ def withdraw_rtau(amount: float, to: str):
 @export
 def create_market(tau_amount: float, token_amount: float):
     rtau.assert_signer_is_operator()
-    initial_liq_ready.set(True)
-
     rswp = I.import_module(metadata['dex'])
     return rswp.create_market(contract=rtau.contract(), currency_amount=tau_amount, token_amount=token_amount)
 

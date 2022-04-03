@@ -11,7 +11,6 @@ reverse_holders_index = Hash(default_value=False)
 
 contract = Variable()
 holders_amount = Variable()
-initial_liq_ready = Variable()
 
 @construct
 def init(name: str):
@@ -31,7 +30,6 @@ def init(name: str):
 
     contract.set(name)
     holders_amount.set(0)
-    initial_liq_ready.set(False)
 
     approve()
 
@@ -46,13 +44,6 @@ def approve():
 def change_metadata(key: str, value: Any):
     rtau.assert_signer_is_operator()
     metadata[key] = value
-
-@export
-def sync_initial_liq_state():
-    rtau.assert_signer_is_operator()
-
-    ready = ForeignVariable(foreign_contract=rtau.get_metadata('action_liquidity'), foreign_name='initial_liq_ready')
-    initial_liq_ready.set(ready.get())
 
 @export
 def execute(payload: dict, caller: str):
@@ -74,33 +65,32 @@ def execute(payload: dict, caller: str):
         return calc_taxes(payload['amount'], payload['to'])
 
 def process_transfer(amount: float, to: str, caller: str, main_account: str=""):
-    if initial_liq_ready.get():
-        tax = calc_taxes(amount, to)
+    tax = calc_taxes(amount, to)
 
-        # DEX Buy
-        if (caller == metadata['dex'] and to != contract.get() and main_account == ""):
-            amount -= process_taxes(tax)
+    # DEX Buy
+    if (caller == metadata['dex'] and to != contract.get() and main_account == ""):
+        amount -= process_taxes(tax)
+        add_to_holders_index(to)
+
+    # DEX Sell
+    elif (to==metadata['dex'] and ctx.signer == main_account and ctx.caller != rtau.get_metadata('action_liquidity')):
+        amount -= process_taxes(tax)
+
+        if (rtau.balance_of(main_account) >= metadata['balance_limit']):
+            add_to_holders_index(main_account)
+        else:
+            remove_from_holders_index(main_account)
+    
+    # Normal Transfer (not transfer_from, here they dont include a sender so we use signer)
+    elif (not to.startswith('con_') and not main_account.startswith('con_')):
+        if (rtau.balance_of(to) + amount >= metadata['balance_limit']):
             add_to_holders_index(to)
-
-        # DEX Sell
-        elif (to==metadata['dex'] and ctx.signer == main_account and ctx.caller != rtau.get_metadata('action_liquidity')):
-            amount -= process_taxes(tax)
-
-            if (rtau.balance_of(main_account) >= metadata['balance_limit']):
-                add_to_holders_index(main_account)
-            else:
-                remove_from_holders_index(main_account)
-        
-        # Normal Transfer (not transfer_from, here they dont include a sender so we use signer)
-        elif (not to.startswith('con_') and not main_account.startswith('con_')):
-            if (rtau.balance_of(to) + amount >= metadata['balance_limit']):
-                add_to_holders_index(to)
-            if (rtau.balance_of(to) + amount < metadata['balance_limit']):
-                remove_from_holders_index(to)
-            if (rtau.balance_of(ctx.signer) >= metadata['balance_limit']):
-                add_to_holders_index(ctx.signer)
-            if (rtau.balance_of(ctx.signer) < metadata['balance_limit']):
-                remove_from_holders_index(ctx.signer)
+        if (rtau.balance_of(to) + amount < metadata['balance_limit']):
+            remove_from_holders_index(to)
+        if (rtau.balance_of(ctx.signer) >= metadata['balance_limit']):
+            add_to_holders_index(ctx.signer)
+        if (rtau.balance_of(ctx.signer) < metadata['balance_limit']):
+            remove_from_holders_index(ctx.signer)
                 
     return amount
 
