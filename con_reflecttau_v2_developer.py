@@ -13,20 +13,20 @@ def execute(payload: dict, caller: str):
 
 def distribute_tau_share():
 	total_amount = tau.balance_of(ctx.this)
-	shareholders = len(rtau.metadata['operators'])
+	shareholders = len(rtau.get_metadata('operators'))
 	individual_amount = int(total_amount / shareholders)
 
-	for op in rtau.metadata['operators']:
-		tau.transfer(amount, op)
+	for op in rtau.get_metadata('operators'):
+		tau.transfer(individual_amount, op)
 
 	return f'{individual_amount}'
 
 def distribute_rtau_share():
 	total_amount = rtau.balance_of(ctx.this)
-	shareholders = len(rtau.metadata['operators'])
+	shareholders = len(rtau.get_metadata('operators'))
 	individual_amount = int(total_amount / shareholders)
 
-	for op in rtau.metadata['operators']:
-		rtau.transfer(amount, op)
+	for op in rtau.get_metadata('operators'):
+		rtau.transfer(individual_amount, op)
 
 	return f'{individual_amount}'

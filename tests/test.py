@@ -218,6 +218,9 @@ class MyTestCase(unittest.TestCase):
 
         logging.debug("New action_liquidity contract = " + str(self.reflecttau_v2.metadata["action_liquidity"]))
 
+        logging.debug("TAU BEFORE : " + str(self.currency.balance_of(account="a5565739151e6f8d3fbb03ab605a31cc285e36a717a95002a60e6e4d4e4fa411")))
+        logging.debug("Payout DEV moneys" + str(self.reflecttau_v2.external_call(action="action_dev",payload={"function":"distribute_tau_share"})))
+        logging.debug("TAU AFTER : " + str(self.currency.balance_of(account="a5565739151e6f8d3fbb03ab605a31cc285e36a717a95002a60e6e4d4e4fa411")))
 
 if __name__ == "__main__":
     log = logging.getLogger("Tests")
