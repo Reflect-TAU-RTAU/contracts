@@ -158,7 +158,7 @@ class MyTestCase(unittest.TestCase):
 
         logging.debug("\x1b[33;20m9. REDISTRIBUTE RTAU V2\x1b[0m")
         logging.debug("User has " + str(self.currency.balance_of(account=self.c.signer)) + " TAU before REDISTRIBUTE")
-        self.reflecttau_v2_reflection.redistribute_tau()
+        self.reflecttau_v2.external_call(action="action_reflection",payload={"function":"redistribute_tau","start":None,"end":None,"reset_pool":None})
         
         logging.debug("\x1b[33;20m REFLECTION HASH RTAU V2\x1b[0m")
         logging.debug(self.reflecttau_v2_reflection.reflections.all())

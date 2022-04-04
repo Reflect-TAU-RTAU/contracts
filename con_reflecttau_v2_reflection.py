@@ -57,9 +57,12 @@ def execute(payload: dict, caller: str):
         assert not 'external' in payload, 'External call not allowed!'
         return process_transfer(payload['amount'], payload['to'], caller, payload['main_account'])
     
-    if payload['function'] == 'add_to_holders_index':
+    if payload['function'] == 'manage_holders_index':
         assert not 'external' in payload, 'External call not allowed!'
-        add_to_holders_index(payload['address'])
+        manage_holders_index(payload['address'], payload['amount'])
+
+    if payload['function'] == 'redistribute_tau':
+        return redistribute_tau(payload['start'], payload['end'], payload['reset_pool'])
 
     if payload['function'] == 'calc_taxes':
         return calc_taxes(payload['amount'], payload['to'])
@@ -71,28 +74,19 @@ def process_transfer(amount: float, to: str, caller: str, main_account: str=""):
     if (caller == metadata['dex'] and to != contract.get() and main_account == ""):
         amount -= process_taxes(tax)
 
-        if (rtau.balance_of(to) >= metadata['balance_limit']):
-            add_to_holders_index(to)
+        manage_holders_index(to, rtau.balance_of(to))
 
     # DEX Sell
     elif (to == metadata['dex'] and ctx.signer == main_account and ctx.caller != rtau.get_metadata('action_liquidity')):
         amount -= process_taxes(tax)
 
-        if (rtau.balance_of(main_account) < metadata['balance_limit']):
-            remove_from_holders_index(main_account)
+        manage_holders_index(main_account, rtau.balance_of(main_account))
     
     # Normal Transfer (not transfer_from, here they dont include a sender so we use signer)
     elif (not to.startswith('con_') and not main_account.startswith('con_')):
-        
-        if (rtau.balance_of(to) + amount >= metadata['balance_limit']):
-            add_to_holders_index(to)
-        else:
-            remove_from_holders_index(to)
 
-        if (rtau.balance_of(ctx.signer) >= metadata['balance_limit']):
-            add_to_holders_index(ctx.signer)
-        else:
-            remove_from_holders_index(ctx.signer)
+        manage_holders_index(to, rtau.balance_of(to) + amount)
+        manage_holders_index(ctx.signer, rtau.balance_of(ctx.signer))
                 
     return amount
 
@@ -115,21 +109,20 @@ def process_taxes(taxes: float):
 
     return taxes
 
-def add_to_holders_index(address: str):
-    if (reverse_holders_index[address] == False):
-        holders_amount.set(holders_amount.get() + 1)
-        forward_holders_index[holders_amount.get()] = address
-        reverse_holders_index[address] = holders_amount.get()
+def manage_holders_index(address: str, amount: float):
+    if amount >= metadata['balance_limit']:
+        # Add to holders index and be eligible for TAU reflection
+        if (reverse_holders_index[address] == False):
+            holders_amount.set(holders_amount.get() + 1)
+            forward_holders_index[holders_amount.get()] = address
+            reverse_holders_index[address] = holders_amount.get()
+    else:
+        # Remove from holders index and not be eligible for TAU reflection
+        if (reverse_holders_index[address] != False):
+            forward_holders_index[reverse_holders_index[address]] = False
+            reverse_holders_index[address] = False
 
-def remove_from_holders_index(address: str):
-    if (reverse_holders_index[address] != False):
-        forward_holders_index[reverse_holders_index[address]] = False
-        reverse_holders_index[address] = False
-
-@export
 def redistribute_tau(start: int=None, end: int=None, reset_pool: bool=None):
-    rtau.assert_signer_is_operator()
-
     if start == None:
         start = 1
 
