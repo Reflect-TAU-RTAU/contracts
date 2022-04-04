@@ -199,7 +199,7 @@ def swap_basic(basic_amount: float):
         amount=basic_amount, 
         to=burn_address.get())
 
-    swap_amount = basic_amount
+    swap_amount = basic_amount / 10
     total_supply.set(total_supply.get() + swap_amount)
     balances[ctx.caller] += swap_amount
 
@@ -215,7 +215,7 @@ def swap_rtau(rtau_amount: float):
         amount=rtau_amount, 
         to=burn_address.get())
 
-    swap_amount = rtau_amount / 39
+    swap_amount = rtau_amount / 210
     total_supply.set(total_supply.get() + swap_amount)
     balances[ctx.caller] += swap_amount
 
