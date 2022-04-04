@@ -29,6 +29,12 @@ def change_metadata(key: str, value: Any):
 def execute(payload: dict, caller: str):
     assert ctx.caller == rtau.contract(), 'You are not allowed to do that'
 
+    if payload['function'] == 'create_market':
+        return create_market(payload['tau_amount'], payload['token_amount'])
+
+    if payload['function'] == 'add_liquidity':
+        return add_liquidity(payload['buy'])
+
     if payload['function'] == 'withdraw_tau':
         key = f"{contract.get()}#{payload['function']}#{payload['amount']}#{payload['to']}"
         rtau.assert_operators_agree(agreement=key)
@@ -63,16 +69,11 @@ def withdraw_tau(amount: float, to: str):
 def withdraw_rtau(amount: float, to: str):
     return rtau.transfer(amount=amount, to=to)
 
-@export
 def create_market(tau_amount: float, token_amount: float):
-    rtau.assert_signer_is_operator()
     rswp = I.import_module(metadata['dex'])
     return rswp.create_market(contract=rtau.contract(), currency_amount=tau_amount, token_amount=token_amount)
 
-@export
 def add_liquidity(buy: bool=True):
-    rtau.assert_signer_is_operator()
-
     rswp = I.import_module(metadata['dex'])
     
     if buy: rswp.buy(contract=rtau.contract(), currency_amount=tau.balance_of(contract.get()) / 2)

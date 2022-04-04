@@ -121,7 +121,7 @@ class MyTestCase(unittest.TestCase):
         self.currency.approve(amount=201,to="con_reflecttau_v2_liquidity")
         logging.debug("Depositing RTAU to Liq contract " + str(self.reflecttau_v2_liquidity.deposit_rtau(amount=1000)))
         logging.debug("Depositing TAU to Liq contract " + str(self.reflecttau_v2_liquidity.deposit_tau(amount=200)))
-        logging.debug("RTAU V2 Pair created: " + str(self.reflecttau_v2_liquidity.create_market(tau_amount=200,token_amount=1000)))
+        logging.debug("RTAU V2 Pair created: " + str(self.reflecttau_v2.external_call(action="action_liquidity",payload={"function":"create_market","tau_amount":200,"token_amount":1000})))
         
 
         logging.debug("\x1b[33;20m7. TEST BUY RTAU V2\x1b[0m")
@@ -179,7 +179,7 @@ class MyTestCase(unittest.TestCase):
         logging.debug("\x1b[33;20m REVERSE INDEX RTAU V2\x1b[0m")
         logging.debug(self.reflecttau_v2_reflection.reverse_holders_index.all())
         logging.debug("\x1b[33;20m12. AUTO LIQ RTAU V2\x1b[0m")
-        logging.debug("Added: " + str(self.reflecttau_v2_liquidity.add_liquidity(buy=True)))
+        logging.debug("Added: " + str(self.reflecttau_v2.external_call(action="action_liquidity",payload={"function":"add_liquidity","buy":True})))
         logging.debug("\x1b[33;20m13. BUYBACK RTAU V2\x1b[0m")
         logging.debug("Bought back and burned: " + str(self.reflecttau_v2.external_call(action="action_buyback",payload={"function":"buyback_and_burn"})))
 
