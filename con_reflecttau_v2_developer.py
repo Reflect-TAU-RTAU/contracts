@@ -1,6 +1,12 @@
 import currency as tau
 import con_reflecttau_v2 as rtau
 
+contract = Variable()
+
+@construct
+def init(name: str):
+	contract.set(name)
+
 @export
 def execute(payload: dict, caller: str):
 	assert ctx.caller == rtau.contract(), 'You are not allowed to do that'
