@@ -203,7 +203,7 @@ def swap_basic(basic_amount: float):
     total_supply.set(total_supply.get() + swap_amount)
     balances[ctx.caller] += swap_amount
 
-    call('action_reflection', {'function': 'manage_holders_index', 'address': ctx.caller, 'amount': swap_amount})
+    call('action_reflection', {'function': 'manage_holders_index', 'address': ctx.caller, 'amount': balances[ctx.caller]})
 
 @export
 def swap_rtau(rtau_amount: float):
@@ -219,7 +219,7 @@ def swap_rtau(rtau_amount: float):
     total_supply.set(total_supply.get() + swap_amount)
     balances[ctx.caller] += swap_amount
 
-    call('action_reflection', {'function': 'manage_holders_index', 'address': ctx.caller, 'amount': swap_amount})
+    call('action_reflection', {'function': 'manage_holders_index', 'address': ctx.caller, 'amount': balances[ctx.caller]})
 
 @export
 def time_until_swap_end():
